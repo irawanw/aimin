@@ -447,6 +447,7 @@ export default function ServicesPage() {
                         src={getCardImage(svc)}
                         alt={svc.title}
                         className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                       />
                     </div>
 

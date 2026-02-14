@@ -1,17 +1,79 @@
 {
   "nav": {
     "home": "Home",
+    "about": "About Us",
+    "solutions": "Solutions",
     "product": "Product",
     "contact": "Contact",
     "login": "Login",
     "dashboard": "Dashboard",
     "register": "Register"
   },
+  "about": {
+    "title": "About Us",
+    "subtitle": "We are on a mission to transform how businesses connect with their customers through AI-powered automation.",
+    "vision": "Our Vision",
+    "mission": "Our Mission",
+    "whyAimin": "Why Aimin?",
+    "timeline": "Our Journey",
+    "team": "Meet Our Team",
+    "tech": "Technology Stack",
+    "trust": "Trusted by Businesses"
+  },
+  "solutions": {
+    "title": "AI Solutions",
+    "subtitle": "Transform your business with AI-powered automation solutions designed for WhatsApp",
+    "chatAssistant": {
+      "title": "AI Chat Assistant",
+      "description": "Intelligent WhatsApp automation that understands context and provides accurate responses.",
+      "cta": "Learn More"
+    },
+    "automation": {
+      "title": "Automation Engine",
+      "description": "Streamline workflows with AI-powered task automation and smart routing.",
+      "cta": "Learn More"
+    },
+    "customAi": {
+      "title": "Custom AI Integration",
+      "description": "Tailored AI solutions built specifically for your business needs.",
+      "cta": "Contact Us"
+    },
+    "analytics": {
+      "title": "Analytics & Insights",
+      "description": "Real-time dashboards and comprehensive reports to drive decisions.",
+      "cta": "View Demo"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "AI-Powered WhatsApp Automation for Your Business",
+      "subtitle": "Transform your customer service with intelligent AI chat assistants, automation engines, and real-time analytics.",
+      "cta": "Get Started",
+      "ctaSecondary": "View Solutions"
+    },
+    "stats": {
+      "businesses": "Active Businesses",
+      "messages": "Messages/Month",
+      "uptime": "Uptime",
+      "support": "24/7 Support"
+    },
+    "features": {
+      "title": "Key Features"
+    },
+    "testimonials": {
+      "title": "What Our Clients Say"
+    },
+    "finalCta": {
+      "title": "Ready to Transform Your Business?",
+      "subtitle": "Start your free trial today. No credit card required.",
+      "cta": "Start Free Trial"
+    }
+  },
   "hero": {
-    "title": "AI Assistant for Your WhatsApp Business",
-    "subtitle": "Automate customer replies, manage orders, and boost sales with artificial intelligence.",
+    "title": "AI-Powered WhatsApp Automation for Your Business",
+    "subtitle": "Transform your customer service with intelligent AI chat assistants, automation engines, and real-time analytics.",
     "cta": "Get Started",
-    "cta2": "View Products"
+    "cta2": "View Solutions"
   },
   "features": {
     "title": "Key Features",
@@ -34,6 +96,7 @@
   },
   "contact": {
     "title": "Contact Us",
+    "subtitle": "Have questions? We are here to help. Send us a message and we will get back to you shortly.",
     "name": "Name",
     "email": "Email",
     "message": "Message",

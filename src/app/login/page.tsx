@@ -39,7 +39,7 @@ export default function LoginPage() {
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8"
       >
         <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-          Aimin Assist
+          Aimin Assistant
         </Link>
         <h1 className="mt-6 text-2xl font-bold text-gray-900">{t.nav.login}</h1>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '@/lib/i18n-context';
@@ -20,7 +21,8 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: t.nav.home },
-    { href: '/product', label: t.nav.product },
+    { href: '/about', label: t.nav.about },
+    { href: '/solutions', label: t.nav.solutions },
     { href: '/contact', label: t.nav.contact },
   ];
 
@@ -28,13 +30,28 @@ export default function Navbar() {
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-            Aimin Assistant
+          <Link href="/" className="flex items-center gap-2">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden">
+              <Image
+                src="/logo.jpg"
+                alt="Aimin Logo"
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            </div>
+            <span className={`text-xl font-bold ${scrolled ? 'text-yellow-500' : 'text-yellow-400'}`}>
+              Aimin Assistant
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`text-sm font-medium transition-colors hover:text-brand-600 ${scrolled ? 'text-gray-700' : 'text-white'}`}>
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors hover:text-mint-600 ${scrolled ? 'text-gray-700' : 'text-white'}`}
+              >
                 {link.label}
               </Link>
             ))}
@@ -82,18 +99,18 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <button onClick={() => setLocale(locale === 'id' ? 'en' : 'id')} className="text-sm font-semibold text-brand-600">
+              <button onClick={() => setLocale(locale === 'id' ? 'en' : 'id')} className="text-sm font-semibold text-mint-600">
                 {locale === 'id' ? 'English' : 'Bahasa Indonesia'}
               </button>
               {user ? (
                 <>
-                  <Link href={user.role === 'admin' ? '/admin' : '/dashboard'} className="block text-brand-600 font-semibold" onClick={() => setMenuOpen(false)}>
+                  <Link href={user.role === 'admin' ? '/admin' : '/dashboard'} className="block text-mint-600 font-semibold" onClick={() => setMenuOpen(false)}>
                     {t.nav.dashboard}
                   </Link>
                   <button onClick={logout} className="block text-red-500 font-medium">Logout</button>
                 </>
               ) : (
-                <Link href="/login" className="block text-brand-600 font-semibold" onClick={() => setMenuOpen(false)}>
+                <Link href="/login" className="block text-mint-600 font-semibold" onClick={() => setMenuOpen(false)}>
                   {t.nav.login}
                 </Link>
               )}

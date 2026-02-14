@@ -1,17 +1,79 @@
 {
   "nav": {
     "home": "Beranda",
+    "about": "Tentang Kami",
+    "solutions": "Solusi",
     "product": "Produk",
     "contact": "Kontak",
     "login": "Masuk",
     "dashboard": "Dashboard",
     "register": "Daftar"
   },
+  "about": {
+    "title": "Tentang Kami",
+    "subtitle": "Kami memiliki misi untuk mengubah cara bisnis terhubung dengan pelanggan mereka melalui otomatisasi bertenaga AI.",
+    "vision": "Visi Kami",
+    "mission": "Misi Kami",
+    "whyAimin": "Mengapa Aimin?",
+    "timeline": "Perjalanan Kami",
+    "team": "Tim Kami",
+    "tech": "Teknologi Kami",
+    "trust": "Dipercaya Bisnis"
+  },
+  "solutions": {
+    "title": "Solusi AI",
+    "subtitle": "Transformasi bisnis Anda dengan solusi otomatisasi bertenaga AI yang dirancang untuk WhatsApp",
+    "chatAssistant": {
+      "title": "Asisten Chat AI",
+      "description": "Otomatisasi WhatsApp cerdas yang memahami konteks dan memberikan respons akurat.",
+      "cta": "Pelajari Lebih Lanjut"
+    },
+    "automation": {
+      "title": "Mesin Otomatisasi",
+      "description": "Sederhanakan alur kerja dengan otomatisasi tugas bertenaga AI dan routing cerdas.",
+      "cta": "Pelajari Lebih Lanjut"
+    },
+    "customAi": {
+      "title": "Integrasi AI Kustom",
+      "description": "Solusi AI yang disesuaikan secara khusus untuk kebutuhan bisnis Anda.",
+      "cta": "Hubungi Kami"
+    },
+    "analytics": {
+      "title": "Analitik & Wawasan",
+      "description": "Dashboard real-time dan laporan komprehensif untuk mengambil keputusan.",
+      "cta": "Lihat Demo"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Otomatisasi WhatsApp Berbasis AI untuk Bisnis Anda",
+      "subtitle": "Transformasi layanan pelanggan Anda dengan asisten chat AI cerdas, mesin otomatisasi, dan analitik real-time.",
+      "cta": "Mulai Sekarang",
+      "ctaSecondary": "Lihat Solusi"
+    },
+    "stats": {
+      "businesses": "Bisnis Aktif",
+      "messages": "Pesan/Bulan",
+      "uptime": "Uptime",
+      "support": "Dukungan 24/7"
+    },
+    "features": {
+      "title": "Fitur Unggulan"
+    },
+    "testimonials": {
+      "title": "Apa Kata Klien Kami"
+    },
+    "finalCta": {
+      "title": "Siap Mengubah Bisnis Anda?",
+      "subtitle": "Mulai uji coba gratis hari ini. Tidak perlu kartu kredit.",
+      "cta": "Mulai Uji Coba Gratis"
+    }
+  },
   "hero": {
-    "title": "Asisten AI untuk WhatsApp Bisnis Anda",
-    "subtitle": "Otomatisasi balasan pelanggan, kelola pesanan, dan tingkatkan penjualan dengan kecerdasan buatan.",
+    "title": "Otomatisasi WhatsApp Berbasis AI untuk Bisnis Anda",
+    "subtitle": "Transformasi layanan pelanggan Anda dengan asisten chat AI cerdas, mesin otomatisasi, dan analitik real-time.",
     "cta": "Mulai Sekarang",
-    "cta2": "Lihat Produk"
+    "cta2": "Lihat Solusi"
   },
   "features": {
     "title": "Fitur Unggulan",
@@ -34,6 +96,7 @@
   },
   "contact": {
     "title": "Hubungi Kami",
+    "subtitle": "Punya pertanyaan? Kami siap membantu. Kirimkan pesan dan kami akan segera menghubungi Anda.",
     "name": "Nama",
     "email": "Email",
     "message": "Pesan",

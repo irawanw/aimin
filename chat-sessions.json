@@ -27,10 +27,37 @@
           "role": "assistant",
           "content": "Silakan kak, tanyakan apa saja yang ingin Anda ketahui!",
           "timestamp": 1771035707702
+        },
+        {
+          "role": "user",
+          "content": "mau trial kak",
+          "timestamp": 1771045080988
+        },
+        {
+          "role": "assistant",
+          "content": "Senang sekali kak! Untuk mencoba Paket Trial kami, silakan ketik #TRIAL#NOMOR_HP Anda di chat ini. Jangan lupa ganti NOMOR_HP dengan nomor WhatsApp Anda ya. Selamat mencoba!",
+          "timestamp": 1771045080988
         }
       ],
       "createdAt": 1771035691205,
-      "lastUpdated": 1771035725948
+      "lastUpdated": 1771080768388
+    },
+    "90c27d21-0ff0-45a0-b6ca-65d9ae60b658": {
+      "sessionId": "90c27d21-0ff0-45a0-b6ca-65d9ae60b658",
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "Halo! Ada yang bisa saya bantu?",
+          "timestamp": 1771060045184
+        },
+        {
+          "role": "user",
+          "content": "Kak aku mau cobain trial gimana caranya ya?",
+          "timestamp": 1771060054046
+        }
+      ],
+      "createdAt": 1771055705916,
+      "lastUpdated": 1771061775488
     }
   }
 }

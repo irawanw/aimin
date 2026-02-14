@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-white border-r border-gray-200 fixed h-full hidden lg:block">
         <div className="p-6">
           <Link href="/" className="text-xl font-bold bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-            Aimin Assist
+            Aimin Assistant
           </Link>
           <div className="mt-1 text-xs text-gray-400 uppercase tracking-wide">{t.dashboard.plan}: {user.plan}</div>
         </div>

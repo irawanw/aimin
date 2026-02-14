@@ -184,7 +184,7 @@ export default function ChatWidget() {
       {/* Toggle button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-2xl shadow-brand-600/30 flex items-center justify-center transition-colors"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-mint-600 hover:bg-mint-700 text-white rounded-full shadow-2xl shadow-mint-600/30 flex items-center justify-center transition-colors"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -203,11 +203,11 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] bg-white rounded-2xl shadow-2xl shadow-gray-500/20 border border-gray-100 flex flex-col overflow-hidden"
             style={{ height: '480px' }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-brand-600 to-brand-500 text-white px-4 py-3 flex items-center gap-3">
+            <div className="bg-gradient-to-r from-mint-600 to-mint-500 text-white px-4 py-3 flex items-center gap-3">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm font-bold">AI</div>
               <div>
                 <div className="font-semibold text-sm">{t.chat.title}</div>
@@ -219,7 +219,7 @@ export default function ChatWidget() {
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'bg-brand-600 text-white rounded-br-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'}`}>
+                  <div className={`max-w-[85%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'bg-mint-600 text-white rounded-br-md' : 'bg-gray-100 text-gray-800 rounded-bl-md'}`}>
                     {msg.role === 'assistant' ? formatMessage(msg.content) : msg.content}
                   </div>
                 </div>
@@ -251,9 +251,9 @@ export default function ChatWidget() {
                 }}
                 onKeyDown={(e) => e.key === 'Enter' && send()}
                 placeholder={t.chat.placeholder}
-                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500"
+                className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-mint-500 focus:ring-2 focus:ring-mint-500/20 transition-all"
               />
-              <button onClick={send} disabled={loading || !input.trim()} className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white px-3 py-2 rounded-xl transition-colors">
+              <button onClick={send} disabled={loading || !input.trim()} className="bg-mint-600 hover:bg-mint-700 disabled:opacity-50 disabled:hover:bg-mint-600 text-white px-3 py-2 rounded-xl transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
               </button>
             </div>
