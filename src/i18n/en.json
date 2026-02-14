@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "home": "Home",
+    "product": "Product",
+    "contact": "Contact",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "register": "Register"
+  },
+  "hero": {
+    "title": "AI Assistant for Your WhatsApp Business",
+    "subtitle": "Automate customer replies, manage orders, and boost sales with artificial intelligence.",
+    "cta": "Get Started",
+    "cta2": "View Products"
+  },
+  "features": {
+    "title": "Key Features",
+    "ai": "AI Auto Reply",
+    "aiDesc": "Automatically reply to customer messages with AI that understands your business context.",
+    "knowledge": "Knowledge Base",
+    "knowledgeDesc": "Upload product info and FAQs for more accurate answers.",
+    "analytics": "Smart Analytics",
+    "analyticsDesc": "Monitor chat performance and sales with real-time analytics dashboard.",
+    "handover": "Human Handover",
+    "handoverDesc": "Hand over conversations to your team when AI needs human assistance."
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "lite": "Lite",
+    "pro": "Pro",
+    "popular": "Most Popular",
+    "monthly": "/month",
+    "cta": "Choose Plan"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send Message",
+    "success": "Message sent successfully!"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "description": "AI platform for your WhatsApp business automation."
+  },
+  "chat": {
+    "placeholder": "Type a message...",
+    "title": "Aimin AI Assistant",
+    "welcome": "Hello! How can I help you?"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "knowledge": "Knowledge Base",
+    "products": "Products",
+    "chatlogs": "Chat Logs",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "upgrade": "Upgrade Plan",
+    "plan": "Your Plan",
+    "usage": "Usage",
+    "welcome": "Welcome"
+  },
+  "admin": {
+    "users": "Users",
+    "subscriptions": "Subscriptions",
+    "analytics": "Analytics",
+    "aiConfig": "AI Configuration",
+    "logs": "System Logs",
+    "features": "Feature Toggles",
+    "title": "Admin Panel"
+  }
+}

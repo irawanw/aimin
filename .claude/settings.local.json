@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(node:*)",
+      "Bash(xxd:*)",
+      "Bash(pm2 list:*)",
+      "Bash(systemctl list-units:*)",
+      "Bash(sudo test:*)",
+      "Bash(sudo -n cat:*)",
+      "Bash(npx next build:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(for img in 01.jpg 02.jpg 03.jpg 04.jpg 05.webp 06.png)",
+      "Bash(do echo -n \"$img: \")",
+      "Bash(done)",
+      "Bash(pm2 logs:*)",
+      "Bash(nginx:*)",
+      "Bash(python3:*)",
+      "Bash(mysql:*)",
+      "Bash(xargs cat:*)",
+      "Bash(sudo cat:*)",
+      "Bash(pm2 flush:*)",
+      "Bash(xargs:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

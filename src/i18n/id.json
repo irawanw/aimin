@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "product": "Produk",
+    "contact": "Kontak",
+    "login": "Masuk",
+    "dashboard": "Dashboard",
+    "register": "Daftar"
+  },
+  "hero": {
+    "title": "Asisten AI untuk WhatsApp Bisnis Anda",
+    "subtitle": "Otomatisasi balasan pelanggan, kelola pesanan, dan tingkatkan penjualan dengan kecerdasan buatan.",
+    "cta": "Mulai Sekarang",
+    "cta2": "Lihat Produk"
+  },
+  "features": {
+    "title": "Fitur Unggulan",
+    "ai": "AI Auto Reply",
+    "aiDesc": "Balas pesan pelanggan secara otomatis dengan AI yang memahami konteks bisnis Anda.",
+    "knowledge": "Knowledge Base",
+    "knowledgeDesc": "Upload informasi produk dan FAQ untuk jawaban yang lebih akurat.",
+    "analytics": "Analitik Cerdas",
+    "analyticsDesc": "Pantau performa chat dan penjualan dengan dashboard analitik real-time.",
+    "handover": "Human Handover",
+    "handoverDesc": "Serahkan percakapan ke tim Anda saat AI membutuhkan bantuan manusia."
+  },
+  "pricing": {
+    "title": "Pilih Paket Anda",
+    "lite": "Lite",
+    "pro": "Pro",
+    "popular": "Terpopuler",
+    "monthly": "/bulan",
+    "cta": "Pilih Paket"
+  },
+  "contact": {
+    "title": "Hubungi Kami",
+    "name": "Nama",
+    "email": "Email",
+    "message": "Pesan",
+    "send": "Kirim Pesan",
+    "success": "Pesan berhasil dikirim!"
+  },
+  "footer": {
+    "rights": "Hak Cipta Dilindungi.",
+    "description": "Platform AI untuk otomatisasi bisnis WhatsApp Anda."
+  },
+  "chat": {
+    "placeholder": "Ketik pesan...",
+    "title": "Aimin AI Assistant",
+    "welcome": "Halo! Ada yang bisa saya bantu?"
+  },
+  "dashboard": {
+    "overview": "Ringkasan",
+    "knowledge": "Knowledge Base",
+    "products": "Produk",
+    "chatlogs": "Log Chat",
+    "analytics": "Analitik",
+    "settings": "Pengaturan",
+    "upgrade": "Upgrade Paket",
+    "plan": "Paket Anda",
+    "usage": "Penggunaan",
+    "welcome": "Selamat datang"
+  },
+  "admin": {
+    "users": "Pengguna",
+    "subscriptions": "Langganan",
+    "analytics": "Analitik",
+    "aiConfig": "Konfigurasi AI",
+    "logs": "Log Sistem",
+    "features": "Fitur Toggle",
+    "title": "Admin Panel"
+  }
+}

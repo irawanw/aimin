@@ -1,0 +1,142 @@
+{
+  "sessions": {},
+  "trees": {
+    "2340": {
+      "root_id": "2340",
+      "nodes": {
+        "2340": {
+          "node_id": "2340",
+          "incoming": {
+            "text": "explain me the codebase",
+            "chat_id": "337802884",
+            "user_id": "337802884",
+            "message_id": "2340",
+            "platform": "telegram",
+            "reply_to_message_id": null,
+            "username": null
+          },
+          "status_message_id": "2341",
+          "state": "error",
+          "parent_id": null,
+          "session_id": null,
+          "children_ids": [],
+          "created_at": "2026-02-14T00:17:54.939119+00:00",
+          "completed_at": null,
+          "error_message": "Lost during server restart"
+        }
+      }
+    },
+    "2353": {
+      "root_id": "2353",
+      "nodes": {
+        "2353": {
+          "node_id": "2353",
+          "incoming": {
+            "text": "/start",
+            "chat_id": "337802884",
+            "user_id": "337802884",
+            "message_id": "2353",
+            "platform": "telegram",
+            "reply_to_message_id": null,
+            "username": null
+          },
+          "status_message_id": "2355",
+          "state": "error",
+          "parent_id": null,
+          "session_id": null,
+          "children_ids": [],
+          "created_at": "2026-02-14T00:29:40.565171+00:00",
+          "completed_at": null,
+          "error_message": "Lost during server restart"
+        }
+      }
+    },
+    "2363": {
+      "root_id": "2363",
+      "nodes": {
+        "2363": {
+          "node_id": "2363",
+          "incoming": {
+            "text": "/start",
+            "chat_id": "337802884",
+            "user_id": "337802884",
+            "message_id": "2363",
+            "platform": "telegram",
+            "reply_to_message_id": null,
+            "username": null
+          },
+          "status_message_id": "2365",
+          "state": "error",
+          "parent_id": null,
+          "session_id": null,
+          "children_ids": [],
+          "created_at": "2026-02-14T00:34:51.498419+00:00",
+          "completed_at": null,
+          "error_message": "Lost during server restart"
+        }
+      }
+    },
+    "2368": {
+      "root_id": "2368",
+      "nodes": {
+        "2368": {
+          "node_id": "2368",
+          "incoming": {
+            "text": "for chatwidget i want session is saved when uset navigate through pages. clear session in 24 hour",
+            "chat_id": "337802884",
+            "user_id": "337802884",
+            "message_id": "2368",
+            "platform": "telegram",
+            "reply_to_message_id": null,
+            "username": null
+          },
+          "status_message_id": "2369",
+          "state": "error",
+          "parent_id": null,
+          "session_id": null,
+          "children_ids": [],
+          "created_at": "2026-02-14T00:41:11.474260+00:00",
+          "completed_at": null,
+          "error_message": "Lost during server restart"
+        }
+      }
+    },
+    "2370": {
+      "root_id": "2370",
+      "nodes": {
+        "2370": {
+          "node_id": "2370",
+          "incoming": {
+            "text": "for chatwidget i want session is saved when uset navigate through pages. clear session in 24 hour folder is /data/www/aimin",
+            "chat_id": "337802884",
+            "user_id": "337802884",
+            "message_id": "2370",
+            "platform": "telegram",
+            "reply_to_message_id": null,
+            "username": null
+          },
+          "status_message_id": "2371",
+          "state": "pending",
+          "parent_id": null,
+          "session_id": null,
+          "children_ids": [],
+          "created_at": "2026-02-14T00:47:48.810016+00:00",
+          "completed_at": null,
+          "error_message": null
+        }
+      }
+    }
+  },
+  "node_to_tree": {
+    "2340": "2340",
+    "2341": "2340",
+    "2353": "2353",
+    "2355": "2353",
+    "2363": "2363",
+    "2365": "2363",
+    "2368": "2368",
+    "2369": "2368",
+    "2370": "2370",
+    "2371": "2370"
+  }
+}

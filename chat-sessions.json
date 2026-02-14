@@ -1,0 +1,36 @@
+{
+  "sessions": {
+    "256107c4-7a13-4465-b031-c99d4af77e00": {
+      "sessionId": "256107c4-7a13-4465-b031-c99d4af77e00",
+      "messages": [
+        {
+          "role": "assistant",
+          "content": "Halo! Ada yang bisa saya bantu?",
+          "timestamp": 1771035691205
+        },
+        {
+          "role": "user",
+          "content": "halo kak",
+          "timestamp": 1771035691205
+        },
+        {
+          "role": "assistant",
+          "content": "Halo kak! Ada yang mau dibantu?",
+          "timestamp": 1771035691205
+        },
+        {
+          "role": "user",
+          "content": "mau tanya",
+          "timestamp": 1771035707702
+        },
+        {
+          "role": "assistant",
+          "content": "Silakan kak, tanyakan apa saja yang ingin Anda ketahui!",
+          "timestamp": 1771035707702
+        }
+      ],
+      "createdAt": 1771035691205,
+      "lastUpdated": 1771035725948
+    }
+  }
+}
