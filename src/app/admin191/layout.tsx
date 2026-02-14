@@ -13,6 +13,7 @@ interface Admin {
 export default function Admin191Layout({ children }: { children: React.ReactNode }) {
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -39,10 +40,26 @@ export default function Admin191Layout({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen bg-gray-950 flex text-gray-100">
-      <AdminSidebar adminName={admin.adm_name} onLogout={handleLogout} />
+      <AdminSidebar
+        adminName={admin.adm_name}
+        onLogout={handleLogout}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
       <div className="lg:ml-64 flex-1">
-        <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-100">Admin Panel</h1>
+        <header className="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden text-gray-400 hover:text-gray-200 p-1"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-gray-100">Admin Panel</h1>
+          </div>
           <span className="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-mono font-semibold">ADMIN</span>
         </header>
         <main className="p-6">{children}</main>

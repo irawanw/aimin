@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import UserSidebar from '@/components/user/UserSidebar';
 import { Suspense } from 'react';
 
@@ -13,8 +13,8 @@ interface PelangganUser {
 function UserLayoutInner({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<PelangganUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const hasLoginToken = searchParams.has('token');
@@ -62,10 +62,27 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-gray-950 flex text-gray-100">
-      <UserSidebar storeName={user.store_name} onLogout={handleLogout} />
+      <UserSidebar
+        storeName={user.store_name}
+        onLogout={handleLogout}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
       <div className="lg:ml-64 flex-1">
-        <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-100">{user.store_name}</h1>
+        <header className="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Hamburger - mobile only */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden text-gray-400 hover:text-gray-200 p-1"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-gray-100">{user.store_name}</h1>
+          </div>
           <span className="text-xs bg-brand-500/20 text-brand-400 px-2.5 py-1 rounded-full font-mono font-semibold">USER</span>
         </header>
         <main className="p-6">{children}</main>

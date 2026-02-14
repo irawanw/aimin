@@ -15,37 +15,71 @@ const navItems = [
 interface Props {
   storeName: string;
   onLogout: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
-export default function UserSidebar({ storeName, onLogout }: Props) {
+export default function UserSidebar({ storeName, onLogout, mobileOpen, onMobileClose }: Props) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-gray-900 border-r border-gray-800 fixed h-full hidden lg:block">
-      <div className="p-6">
-        <Link href="/user" className="text-xl font-bold bg-gradient-to-r from-brand-400 to-cyan-400 bg-clip-text text-transparent">
-          AiMin Dashboard
-        </Link>
-        <div className="mt-1 text-xs text-gray-500 uppercase tracking-wide font-mono">{storeName}</div>
-      </div>
-      <nav className="px-3 space-y-1">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${active ? 'bg-brand-600/20 text-brand-400' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} /></svg>
-              {item.label}
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+
+      <aside
+        className={`w-64 bg-gray-900 border-r border-gray-800 fixed h-full z-30 flex flex-col transition-transform duration-300 ease-in-out
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+      >
+        <div className="p-6 flex items-center justify-between">
+          <div>
+            <Link href="/user" className="text-xl font-bold bg-gradient-to-r from-brand-400 to-cyan-400 bg-clip-text text-transparent">
+              AiMin Dashboard
             </Link>
-          );
-        })}
-      </nav>
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
-        <button onClick={onLogout} className="w-full text-sm text-gray-500 hover:text-red-400 transition-colors">Logout</button>
-      </div>
-    </aside>
+            <div className="mt-1 text-xs text-gray-500 uppercase tracking-wide font-mono">{storeName}</div>
+          </div>
+          {/* Close button - mobile only */}
+          <button
+            onClick={onMobileClose}
+            className="lg:hidden text-gray-500 hover:text-gray-300 p-1"
+            aria-label="Close menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <nav className="px-3 space-y-1 flex-1">
+          {navItems.map((item) => {
+            const active = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onMobileClose}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${active ? 'bg-brand-600/20 text-brand-400' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
+                </svg>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-gray-800">
+          <button onClick={onLogout} className="w-full text-sm text-gray-500 hover:text-red-400 transition-colors">
+            Logout
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

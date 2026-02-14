@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@/lib/user-context';
 import { useI18n } from '@/lib/i18n-context';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { href: '/dashboard', key: 'overview', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1' },
@@ -20,6 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { user, loading, logout } = useUser();
   const { t } = useI18n();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
@@ -31,21 +32,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-20 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 fixed h-full hidden lg:block">
-        <div className="p-6">
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-            Aimin Assistant
-          </Link>
-          <div className="mt-1 text-xs text-gray-400 uppercase tracking-wide">{t.dashboard.plan}: {user.plan}</div>
+      <aside className={`w-64 bg-white border-r border-gray-200 fixed h-full z-30 flex flex-col transition-transform duration-300 ease-in-out
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <div className="p-6 flex items-center justify-between">
+          <div>
+            <Link href="/" className="text-xl font-bold bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
+              Aimin Assistant
+            </Link>
+            <div className="mt-1 text-xs text-gray-400 uppercase tracking-wide">{t.dashboard.plan}: {user.plan}</div>
+          </div>
+          {/* Close button - mobile only */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="lg:hidden text-gray-400 hover:text-gray-600 p-1"
+            aria-label="Close menu"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <nav className="px-3 space-y-1">
+        <nav className="px-3 space-y-1 flex-1">
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${active ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} /></svg>
@@ -54,7 +77,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             );
           })}
         </nav>
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100">
           <Link href="/dashboard/upgrade" className="block w-full text-center btn-primary text-sm !py-2">{t.dashboard.upgrade}</Link>
           <button onClick={logout} className="mt-2 w-full text-sm text-gray-500 hover:text-red-500 transition-colors">Logout</button>
         </div>
@@ -62,8 +85,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main */}
       <div className="lg:ml-64 flex-1">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">{t.dashboard.welcome}, {user.name}</h1>
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Hamburger - mobile only */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden text-gray-500 hover:text-gray-700 p-1"
+              aria-label="Open menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold text-gray-900">{t.dashboard.welcome}, {user.name}</h1>
+          </div>
           <span className="text-xs bg-brand-100 text-brand-700 px-2.5 py-1 rounded-full font-semibold uppercase">{user.plan}</span>
         </header>
         <main className="p-6">{children}</main>
