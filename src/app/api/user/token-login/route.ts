@@ -62,6 +62,7 @@ export async function POST(req: Request) {
       secure: true,
       sameSite: 'lax',
       path: '/',
+      domain: '.aiminassist.com',
       maxAge: 7 * 24 * 60 * 60,
     });
 

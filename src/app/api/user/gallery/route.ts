@@ -55,7 +55,7 @@ async function saveImage(base64: string, folder: string, type: 'gallery'): Promi
 
   fs.writeFileSync(filepath, buffer);
 
-  return `/${folder}/${type}/${filename}`;
+  return `/uploads/${folder}/${type}/${filename}`;
 }
 
 // DELETE handler

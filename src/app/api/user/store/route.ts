@@ -53,7 +53,7 @@ export async function GET() {
               store_id, store_subdomain, store_design_type, store_site_type,
               store_theme_primary, store_theme_background, store_hero_title, store_hero_subtitle,
               store_hero_image, store_hero_image_keyword, store_about_us,
-              store_latitude, store_longitude
+              store_latitude, store_longitude, store_website_others
        FROM pelanggan WHERE store_whatsapp_jid = ?`,
       [jid]
     );
@@ -86,7 +86,7 @@ export async function PUT(req: Request) {
       'store_subdomain', 'store_design_type', 'store_site_type',
       'store_theme_primary', 'store_theme_background', 'store_hero_title', 'store_hero_subtitle',
       'store_hero_image_keyword', 'store_hero_image', 'store_about_us',
-      'store_latitude', 'store_longitude',
+      'store_latitude', 'store_longitude', 'store_website_others',
     ];
 
     const updates: string[] = [];

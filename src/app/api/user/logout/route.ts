@@ -7,6 +7,7 @@ export async function POST() {
     secure: true,
     sameSite: 'lax',
     path: '/',
+    domain: '.aiminassist.com',
     maxAge: 0,
   });
   return res;
