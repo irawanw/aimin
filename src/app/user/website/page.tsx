@@ -42,6 +42,63 @@ function compressImage(file: File, maxWidth = 1200, quality = 0.85): Promise<str
   });
 }
 
+function ColorPicker({ label, value, onChange, presets }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  presets: string[];
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="rounded-xl bg-gray-800 border border-gray-700 p-3 space-y-2.5">
+      <span className="text-xs text-gray-500">{label}</span>
+      {/* Swatch + hex input row */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="w-10 h-10 rounded-lg border-2 border-white/10 shadow-lg flex-shrink-0 transition-transform hover:scale-105 active:scale-95"
+          style={{ backgroundColor: value }}
+          title="Klik untuk pilih warna"
+        />
+        <input ref={inputRef} type="color" className="sr-only" value={value} onChange={(e) => onChange(e.target.value)} />
+        <div className="flex-1 min-w-0 flex rounded-lg overflow-hidden border border-gray-600">
+          <span className="px-2 py-2 bg-gray-700 text-gray-500 text-xs select-none">#</span>
+          <input
+            type="text"
+            maxLength={7}
+            className="flex-1 min-w-0 px-2 py-2 bg-gray-900 text-gray-100 font-mono text-sm outline-none"
+            value={value.replace('#', '')}
+            onChange={(e) => {
+              const v = e.target.value.replace(/[^0-9a-fA-F]/g, '');
+              if (v.length <= 6) onChange('#' + v);
+            }}
+            onBlur={(e) => {
+              const v = e.target.value.replace(/[^0-9a-fA-F]/g, '');
+              if (v.length === 3 || v.length === 6) onChange('#' + v);
+            }}
+          />
+        </div>
+      </div>
+      {/* Preview bar */}
+      <div className="h-6 rounded-lg w-full border border-white/5" style={{ backgroundColor: value }} />
+      {/* Preset swatches */}
+      <div className="flex gap-1.5 flex-wrap">
+        {presets.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onChange(c)}
+            title={c}
+            className={`w-6 h-6 rounded-md border-2 transition-all hover:scale-110 ${value.toLowerCase() === c.toLowerCase() ? 'border-white scale-110' : 'border-transparent'}`}
+            style={{ backgroundColor: c }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WebsitePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -230,15 +287,15 @@ export default function WebsitePage() {
           {/* Subdomain */}
           <div>
             <label className="block text-sm text-gray-400 mb-1">Subdomain</label>
-            <div className="flex items-center gap-0">
+            <div className="flex rounded-xl overflow-hidden border border-gray-700 focus-within:border-brand-500 transition-colors">
               <input
                 type="text"
-                className="flex-1 px-4 py-2.5 rounded-l-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors"
+                className="flex-1 min-w-0 px-4 py-2.5 bg-gray-800 text-gray-100 outline-none"
                 value={form.store_subdomain}
                 onChange={(e) => setForm({ ...form, store_subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                 placeholder="nama-toko"
               />
-              <span className="px-4 py-2.5 bg-gray-700 border border-l-0 border-gray-700 rounded-r-xl text-gray-400 text-sm whitespace-nowrap">.aiminassist.com</span>
+              <span className="px-3 py-2.5 bg-gray-700/80 text-gray-400 text-xs sm:text-sm whitespace-nowrap flex items-center border-l border-gray-700 select-none">.aiminassist.com</span>
             </div>
             <p className="text-xs text-gray-600 mt-1">Hanya huruf kecil, angka, dan strip (-)</p>
           </div>
@@ -257,40 +314,21 @@ export default function WebsitePage() {
           </div>
 
           {/* Theme Colors */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Warna Utama</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  className="w-10 h-10 rounded-lg border border-gray-700 bg-gray-800 cursor-pointer p-0.5"
-                  value={form.store_theme_primary}
-                  onChange={(e) => setForm({ ...form, store_theme_primary: e.target.value })}
-                />
-                <input
-                  type="text"
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors font-mono text-sm"
-                  value={form.store_theme_primary}
-                  onChange={(e) => setForm({ ...form, store_theme_primary: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Warna Background</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  className="w-10 h-10 rounded-lg border border-gray-700 bg-gray-800 cursor-pointer p-0.5"
-                  value={form.store_theme_background}
-                  onChange={(e) => setForm({ ...form, store_theme_background: e.target.value })}
-                />
-                <input
-                  type="text"
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors font-mono text-sm"
-                  value={form.store_theme_background}
-                  onChange={(e) => setForm({ ...form, store_theme_background: e.target.value })}
-                />
-              </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-3">Warna Tema</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <ColorPicker
+                label="Warna Utama"
+                value={form.store_theme_primary}
+                onChange={(v) => setForm({ ...form, store_theme_primary: v })}
+                presets={['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#0ea5e9','#3b82f6']}
+              />
+              <ColorPicker
+                label="Warna Background"
+                value={form.store_theme_background}
+                onChange={(v) => setForm({ ...form, store_theme_background: v })}
+                presets={['#0f172a','#1e1b4b','#0c0a09','#111827','#1a1a2e','#0d1117','#ffffff','#f8fafc','#f1f5f9','#e2e8f0']}
+              />
             </div>
           </div>
 

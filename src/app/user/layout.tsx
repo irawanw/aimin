@@ -68,7 +68,7 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
-      <div className="lg:ml-64 flex-1">
+      <div className="lg:ml-64 flex-1 min-w-0 overflow-x-hidden">
         <header className="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Hamburger - mobile only */}
@@ -85,7 +85,7 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
           </div>
           <span className="text-xs bg-brand-500/20 text-brand-400 px-2.5 py-1 rounded-full font-mono font-semibold">USER</span>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );

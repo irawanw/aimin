@@ -331,12 +331,12 @@ function UserDashboard() {
         {/* Store Info */}
         <div className="glass-dark rounded-2xl p-5">
           <h3 className="text-white font-semibold mb-4">Informasi Toko</h3>
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <tbody className="divide-y divide-gray-800">
               {infoRows.map((row) => (
                 <tr key={row.label}>
-                  <td className="py-3 text-gray-500 w-2/5">{row.label}</td>
-                  <td className="py-3 text-gray-200" style={row.pre ? { whiteSpace: 'pre-wrap' } : undefined}>
+                  <td className="py-3 text-gray-500 w-2/5 align-top pr-3">{row.label}</td>
+                  <td className="py-3 text-gray-200 break-words min-w-0" style={row.pre ? { whiteSpace: 'pre-wrap', wordBreak: 'break-word' } : undefined}>
                     {row.statusBadge ? (
                       <span className={`text-xs px-2 py-0.5 rounded-full ${row.active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                         {row.value}
@@ -356,14 +356,14 @@ function UserDashboard() {
         {/* Features */}
         <div className="glass-dark rounded-2xl p-5">
           <h3 className="text-white font-semibold mb-4">Fitur Produk</h3>
-          <p className="text-gray-300 text-sm" style={{ whiteSpace: 'pre-wrap' }}>{store.store_feature || '-'}</p>
+          <p className="text-gray-300 text-sm break-words" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{store.store_feature || '-'}</p>
         </div>
       </div>
 
       {/* Knowledge Base */}
       <div className="glass-dark rounded-2xl p-5">
         <h3 className="text-white font-semibold mb-4">Knowledge Base</h3>
-        <p className="text-gray-300 text-sm" style={{ whiteSpace: 'pre-wrap' }}>{store.store_knowledge_base || '-'}</p>
+        <p className="text-gray-300 text-sm break-words" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{store.store_knowledge_base || '-'}</p>
       </div>
 
       {/* Foto Produk - Upload & Gallery */}
