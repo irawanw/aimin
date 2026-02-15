@@ -2,86 +2,230 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  LayoutDashboard, PenLine, Globe, Images, Briefcase,
+  Star, MessageSquare, BarChart2, ChevronLeft, LogOut,
+  Sparkles,
+} from 'lucide-react';
 
-const navItems = [
-  { href: '/user', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1' },
-  { href: '/user/edit', label: 'Edit Toko', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
-  { href: '/user/website', label: 'Website', icon: 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9' },
-  { href: '/user/gallery', label: 'Gallery', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-  { href: '/user/services', label: 'Layanan', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
-  { href: '/user/reviews', label: 'Ulasan', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783-.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
-  { href: '/user/widget', label: 'Chat Widget', icon: 'M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
-  { href: '/user/conversations', label: 'Percakapan', icon: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+const NAV_GROUPS = [
+  {
+    label: 'Toko',
+    items: [
+      { href: '/user', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
+      { href: '/user/website', label: 'Website', icon: Globe },
+      { href: '/user/gallery', label: 'Gallery', icon: Images },
+    ],
+  },
+  {
+    label: 'Bisnis',
+    items: [
+      { href: '/user/services', label: 'Layanan', icon: Briefcase },
+      { href: '/user/reviews', label: 'Ulasan', icon: Star },
+      { href: '/user/conversations', label: 'Percakapan', icon: BarChart2 },
+      { href: '/user/widget', label: 'Chat Widget', icon: MessageSquare },
+    ],
+  },
 ];
 
 interface Props {
   storeName: string;
   onLogout: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
 }
 
-export default function UserSidebar({ storeName, onLogout, mobileOpen, onMobileClose }: Props) {
+export default function UserSidebar({
+  storeName, onLogout, collapsed, onToggleCollapse, mobileOpen, onMobileClose,
+}: Props) {
   const pathname = usePathname();
+
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="flex items-center h-14 px-4 border-b border-[--border] flex-shrink-0">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-mint-400 to-mint-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-mint-500/30">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+          </div>
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.18 }}
+                className="text-sm font-semibold text-white whitespace-nowrap overflow-hidden"
+              >
+                AiMin
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Collapse toggle — desktop only */}
+        <button
+          onClick={onToggleCollapse}
+          className="hidden lg:flex ml-auto w-6 h-6 items-center justify-center rounded-md text-[--text-muted] hover:text-[--text-secondary] hover:bg-[--surface-3] transition-colors flex-shrink-0"
+        >
+          <motion.div animate={{ rotate: collapsed ? 180 : 0 }} transition={{ duration: 0.2 }}>
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </motion.div>
+        </button>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label}>
+            <AnimatePresence initial={false}>
+              {!collapsed && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-[10px] font-semibold uppercase tracking-widest text-[--text-muted] px-2 mb-1 overflow-hidden"
+                >
+                  {group.label}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <div className="space-y-0.5">
+              {group.items.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={onMobileClose}
+                    title={collapsed ? label : undefined}
+                    className={`
+                      relative flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium
+                      transition-all duration-150 group
+                      ${active
+                        ? 'bg-[--accent-dim] text-mint-400'
+                        : 'text-[--text-secondary] hover:bg-[--surface-3] hover:text-[--text-primary]'
+                      }
+                    `}
+                  >
+                    {active && (
+                      <motion.div
+                        layoutId="sidebar-active"
+                        className="absolute inset-0 rounded-lg bg-[--accent-dim] border border-mint-500/20"
+                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                      />
+                    )}
+                    <Icon className={`relative w-4 h-4 flex-shrink-0 ${active ? 'text-mint-400' : 'text-[--text-muted] group-hover:text-[--text-secondary]'} transition-colors`} />
+                    <AnimatePresence initial={false}>
+                      {!collapsed && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="relative whitespace-nowrap overflow-hidden"
+                        >
+                          {label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    {active && !collapsed && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="relative ml-auto w-1.5 h-1.5 rounded-full bg-mint-400"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* Footer */}
+      <div className="px-2 pb-3 border-t border-[--border] pt-3 flex-shrink-0">
+        <div className={`flex items-center gap-2.5 px-2 py-2 rounded-lg overflow-hidden ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-mint-400 to-brand-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+            {storeName.charAt(0).toUpperCase()}
+          </div>
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15 }}
+                className="text-xs text-[--text-secondary] truncate overflow-hidden whitespace-nowrap flex-1 min-w-0"
+              >
+                {storeName}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+        <button
+          onClick={onLogout}
+          title={collapsed ? 'Logout' : undefined}
+          className={`mt-0.5 w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm text-[--text-muted] hover:text-red-400 hover:bg-red-500/8 transition-all group ${collapsed ? 'justify-center' : ''}`}
+        >
+          <LogOut className="w-4 h-4 flex-shrink-0" />
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15 }}
+                className="whitespace-nowrap overflow-hidden"
+              >
+                Logout
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <>
       {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-20 lg:hidden"
-          onClick={onMobileClose}
-        />
-      )}
-
-      <aside
-        className={`w-64 bg-gray-900 border-r border-gray-800 fixed h-full z-30 flex flex-col transition-transform duration-300 ease-in-out
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
-      >
-        <div className="p-6 flex items-center justify-between">
-          <div>
-            <Link href="/user" className="text-xl font-bold bg-gradient-to-r from-brand-400 to-cyan-400 bg-clip-text text-transparent">
-              AiMin Dashboard
-            </Link>
-            <div className="mt-1 text-xs text-gray-500 uppercase tracking-wide font-mono">{storeName}</div>
-          </div>
-          {/* Close button - mobile only */}
-          <button
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
             onClick={onMobileClose}
-            className="lg:hidden text-gray-500 hover:text-gray-300 p-1"
-            aria-label="Close menu"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+          />
+        )}
+      </AnimatePresence>
 
-        <nav className="px-3 space-y-1 flex-1">
-          {navItems.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onMobileClose}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${active ? 'bg-brand-600/20 text-brand-400' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                </svg>
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Desktop sidebar */}
+      <motion.aside
+        animate={{ width: collapsed ? 56 : 240 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+        className="hidden lg:flex flex-col fixed left-0 top-0 h-full z-30 bg-[--surface-1] border-r border-[--border] overflow-hidden"
+      >
+        {sidebarContent}
+      </motion.aside>
 
-        <div className="p-4 border-t border-gray-800">
-          <button onClick={onLogout} className="w-full text-sm text-gray-500 hover:text-red-400 transition-colors">
-            Logout
-          </button>
-        </div>
-      </aside>
+      {/* Mobile sidebar (slide-in drawer) */}
+      <motion.aside
+        initial={false}
+        animate={{ x: mobileOpen ? 0 : -260 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+        className="lg:hidden fixed left-0 top-0 h-full w-60 z-30 bg-[--surface-1] border-r border-[--border] flex flex-col"
+      >
+        {sidebarContent}
+      </motion.aside>
     </>
   );
 }

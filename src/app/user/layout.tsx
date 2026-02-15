@@ -2,41 +2,50 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import UserSidebar from '@/components/user/UserSidebar';
 import { Suspense } from 'react';
+import { motion } from 'framer-motion';
+import UserSidebar from '@/components/user/UserSidebar';
+import UserTopbar from '@/components/user/UserTopbar';
+import UserBottomNav from '@/components/user/UserBottomNav';
 
 interface PelangganUser {
   jid: string;
   store_name: string;
+  store_subdomain?: string;
+  store_status?: string;
 }
 
 function UserLayoutInner({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<PelangganUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const hasLoginToken = searchParams.has('token');
 
   useEffect(() => {
-    // If there's a login token in URL, let the page handle it first
-    if (hasLoginToken) {
-      setLoading(false);
-      return;
-    }
-
+    if (hasLoginToken) { setLoading(false); return; }
     fetch('/api/user/me')
       .then((r) => r.json())
-      .then((data) => {
-        if (data.jid) {
-          setUser(data);
-        }
-        // Don't redirect - let the page show the error
-      })
+      .then((data) => { if (data.jid) setUser(data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [hasLoginToken]);
+
+  // Also fetch subdomain + status for topbar
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/user/store')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setUser((u) => u ? { ...u, store_subdomain: data.store_subdomain, store_status: data.store_status } : u);
+        }
+      })
+      .catch(() => {});
+  }, [user?.jid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = useCallback(async () => {
     await fetch('/api/user/logout', { method: 'POST' });
@@ -44,48 +53,72 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
     router.push('/user');
   }, [router]);
 
-  // When token login is in progress, just render children (the page handles it)
   if (hasLoginToken) return <>{children}</>;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-[--surface-0] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-mint-400 to-mint-600 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-mint-500 animate-bounce" />
+        </div>
       </div>
     );
   }
 
-  // Not authenticated - show login form
   if (!user) {
     return <PelangganLoginPage onSuccess={(u) => setUser(u)} />;
   }
 
+  const sidebarWidth = collapsed ? 56 : 240;
+
   return (
-    <div className="min-h-screen bg-gray-950 flex text-gray-100">
+    <div className="min-h-screen bg-[--surface-0] text-[--text-primary]">
       <UserSidebar
         storeName={user.store_name}
         onLogout={handleLogout}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed(!collapsed)}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
-      <div className="lg:ml-64 flex-1 min-w-0 overflow-x-hidden">
-        <header className="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Hamburger - mobile only */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden text-gray-400 hover:text-gray-200 p-1"
-              aria-label="Open menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <h1 className="text-lg font-semibold text-gray-100">{user.store_name}</h1>
+
+      {/* Main area — shifts right on desktop based on sidebar width */}
+      <motion.div
+        animate={{ paddingLeft: sidebarWidth }}
+        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+        className="hidden lg:block"
+        style={{ paddingLeft: sidebarWidth }}
+      >
+        <UserTopbar
+          storeName={user.store_name}
+          storeSubdomain={user.store_subdomain}
+          storeStatus={user.store_status}
+          onMenuOpen={() => setMobileOpen(true)}
+          sidebarCollapsed={collapsed}
+        />
+        <main className="pt-14 min-h-screen">
+          <div className="p-5 lg:p-6">
+            {children}
           </div>
-          <span className="text-xs bg-brand-500/20 text-brand-400 px-2.5 py-1 rounded-full font-mono font-semibold">USER</span>
-        </header>
-        <main className="p-4 lg:p-6">{children}</main>
+        </main>
+      </motion.div>
+
+      {/* Mobile layout */}
+      <div className="lg:hidden">
+        <UserTopbar
+          storeName={user.store_name}
+          storeSubdomain={user.store_subdomain}
+          storeStatus={user.store_status}
+          onMenuOpen={() => setMobileOpen(true)}
+          sidebarCollapsed={false}
+        />
+        <main className="pt-14 pb-20 min-h-screen">
+          <div className="p-4">
+            {children}
+          </div>
+        </main>
+        <UserBottomNav />
       </div>
     </div>
   );
@@ -120,46 +153,69 @@ function PelangganLoginPage({ onSuccess }: { onSuccess: (u: PelangganUser) => vo
     }
   };
 
-  const inputCls = 'w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500';
-
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-      <div className="glass-dark rounded-2xl p-8 max-w-md w-full">
-        <h3 className="text-xl font-bold text-white mb-2 text-center">AiMin Dashboard</h3>
-        <p className="text-gray-500 text-sm text-center mb-6">Login dengan nomor WhatsApp dan password</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Nomor WhatsApp / JID</label>
-            <input
-              value={jid}
-              onChange={e => setJid(e.target.value)}
-              placeholder="628xxx"
-              className={inputCls}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Password"
-              className={inputCls}
-              required
-            />
-          </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-brand-600 hover:bg-brand-700 text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-50"
-          >
-            {submitting ? 'Loading...' : 'Login'}
-          </button>
-        </form>
-        <p className="text-gray-600 text-xs text-center mt-4">Atau gunakan link login dari WhatsApp</p>
+    <div className="min-h-screen bg-[--surface-0] flex items-center justify-center px-4">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-mint-500/5 rounded-full blur-3xl" />
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="relative w-full max-w-sm"
+      >
+        <div className="bg-[--surface-2] border border-[--border] rounded-2xl p-8 shadow-2xl shadow-black/40">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-7">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-mint-400 to-mint-600 flex items-center justify-center shadow-lg shadow-mint-500/30">
+              <svg className="w-4.5 h-4.5 text-white" style={{width:'18px',height:'18px'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <span className="text-lg font-semibold text-white">AiMin Dashboard</span>
+          </div>
+
+          <p className="text-center text-sm text-[--text-muted] mb-6">Masuk ke akun toko Anda</p>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Nomor WhatsApp</label>
+              <input
+                value={jid}
+                onChange={(e) => setJid(e.target.value)}
+                placeholder="628xxxxxxxxxx"
+                className="w-full px-3.5 py-2.5 bg-[--surface-3] border border-[--border] rounded-xl text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 transition-all"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-3.5 py-2.5 bg-[--surface-3] border border-[--border] rounded-xl text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 transition-all"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-2.5 bg-mint-600 hover:bg-mint-500 text-white text-sm font-semibold rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-mint-500/25 mt-1"
+            >
+              {submitting ? 'Masuk...' : 'Masuk'}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-[--text-muted] mt-5">Atau gunakan link login dari WhatsApp</p>
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -168,8 +224,8 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+        <div className="min-h-screen bg-[--surface-0] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-mint-400 to-mint-600 animate-pulse" />
         </div>
       }
     >
