@@ -49,10 +49,10 @@ export async function GET() {
       `SELECT store_whatsapp_jid, store_name, store_admin, store_address,
               store_tagline, store_feature, store_knowledge_base, store_images,
               store_status, store_type, store_fulfillment, store_folder, store_paket, store_expired_at,
-              store_products, store_admin_number, store_bot_always_on, store_updated_at,
+              store_products, store_admin_number, store_bot_always_on, store_email, store_whatsapp_bot, store_updated_at,
               store_id, store_subdomain, store_design_type, store_site_type,
               store_theme_primary, store_theme_background, store_hero_title, store_hero_subtitle,
-              store_hero_image, store_hero_image_keyword
+              store_hero_image, store_hero_image_keyword, store_about_us
        FROM pelanggan WHERE store_whatsapp_jid = ?`,
       [jid]
     );
@@ -81,10 +81,10 @@ export async function PUT(req: Request) {
     const allowedFields = [
       'store_name', 'store_admin', 'store_address', 'store_tagline',
       'store_feature', 'store_knowledge_base', 'store_type', 'store_fulfillment',
-      'store_admin_number', 'store_bot_always_on',
+      'store_admin_number', 'store_bot_always_on', 'store_email', 'store_whatsapp_bot',
       'store_subdomain', 'store_design_type', 'store_site_type',
       'store_theme_primary', 'store_theme_background', 'store_hero_title', 'store_hero_subtitle',
-      'store_hero_image_keyword', 'store_hero_image',
+      'store_hero_image_keyword', 'store_hero_image', 'store_about_us',
     ];
 
     const updates: string[] = [];

@@ -58,6 +58,7 @@ export default function WebsitePage() {
     store_theme_background: '#0f172a',
     store_hero_title: '',
     store_hero_subtitle: '',
+    store_about_us: '',
   });
 
   // Hero image state
@@ -87,6 +88,7 @@ export default function WebsitePage() {
           store_theme_background: data.store_theme_background || '#0f172a',
           store_hero_title: data.store_hero_title || '',
           store_hero_subtitle: data.store_hero_subtitle || '',
+          store_about_us: data.store_about_us || '',
         });
         setHeroImageUrl(data.store_hero_image || null);
         setLoading(false);
@@ -315,6 +317,19 @@ export default function WebsitePage() {
               placeholder="Deskripsi singkat tentang toko Anda"
             />
             <p className="text-xs text-gray-600 mt-1">Teks pendukung di bawah judul hero</p>
+          </div>
+
+          {/* About Us */}
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Tentang Kami</label>
+            <textarea
+              rows={5}
+              className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y"
+              value={form.store_about_us}
+              onChange={(e) => setForm({ ...form, store_about_us: e.target.value })}
+              placeholder="Ceritakan sejarah, visi, dan nilai-nilai toko Anda..."
+            />
+            <p className="text-xs text-gray-600 mt-1">Ditampilkan di halaman About pada website Anda</p>
           </div>
 
           {/* Hero Image */}

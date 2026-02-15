@@ -52,7 +52,6 @@ export default function UserEditPage() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [storeStatus, setStoreStatus] = useState('');
 
   const [form, setForm] = useState({
     store_name: '',
@@ -60,7 +59,9 @@ export default function UserEditPage() {
     store_fulfillment: [] as string[],
     store_admin: '',
     store_admin_number: '',
+    store_email: '',
     store_bot_always_on: 0,
+    store_whatsapp_bot: 1,
     store_tagline: '',
     store_address: '',
     store_feature: '',
@@ -100,14 +101,15 @@ export default function UserEditPage() {
       .then((data) => {
         if (!data || data.error) return;
         setWhatsappNumber(data.store_whatsapp_jid?.replace('@s.whatsapp.net', '') || '');
-        setStoreStatus(data.store_status || '');
         setForm({
           store_name: data.store_name || '',
           store_type: data.store_type || 'store',
           store_fulfillment: parseFulfillment(data.store_fulfillment),
           store_admin: data.store_admin || '',
           store_admin_number: data.store_admin_number || '',
+          store_email: data.store_email || '',
           store_bot_always_on: data.store_bot_always_on ? 1 : 0,
+          store_whatsapp_bot: data.store_whatsapp_bot !== undefined ? (data.store_whatsapp_bot ? 1 : 0) : 1,
           store_tagline: data.store_tagline || '',
           store_address: data.store_address || '',
           store_feature: data.store_feature || '',
@@ -430,6 +432,12 @@ export default function UserEditPage() {
           </div>
 
           <div>
+            <label className="block text-sm text-gray-400 mb-1">Email</label>
+            <input type="email" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_email} onChange={(e) => setForm({ ...form, store_email: e.target.value })} placeholder="email@example.com" />
+            <p className="text-xs text-gray-600 mt-1">Alamat email untuk keperluan bisnis</p>
+          </div>
+
+          <div>
             <label className="block text-sm text-gray-400 mb-1">Bot Always On</label>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={!!form.store_bot_always_on} onChange={(e) => setForm({ ...form, store_bot_always_on: e.target.checked ? 1 : 0 })} />
@@ -437,6 +445,16 @@ export default function UserEditPage() {
               <span className="ml-3 text-sm text-gray-400">Aktifkan bot untuk selalu merespon</span>
             </label>
             <p className="text-xs text-gray-600 mt-1">Jika diaktifkan, bot akan selalu merespon pesan masuk</p>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">WhatsApp Bot</label>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={!!form.store_whatsapp_bot} onChange={(e) => setForm({ ...form, store_whatsapp_bot: e.target.checked ? 1 : 0 })} />
+              <div className="w-11 h-6 bg-gray-700 peer-focus:ring-2 peer-focus:ring-brand-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+              <span className="ml-3 text-sm text-gray-400">Aktifkan WhatsApp bot</span>
+            </label>
+            <p className="text-xs text-gray-600 mt-1">Jika dinonaktifkan, bot tidak akan memproses pesan WhatsApp</p>
           </div>
 
           <div>
@@ -461,12 +479,6 @@ export default function UserEditPage() {
             <label className="block text-sm text-gray-400 mb-1">Knowledge Base</label>
             <textarea rows={6} className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y" value={form.store_knowledge_base} onChange={(e) => setForm({ ...form, store_knowledge_base: e.target.value })} />
             <p className="text-xs text-gray-600 mt-1">Informasi lengkap tentang produk, harga, cara order, dll yang akan digunakan AI untuk menjawab pertanyaan pelanggan</p>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Status</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-500 cursor-not-allowed" value={storeStatus} disabled />
-            <p className="text-xs text-gray-600 mt-1">Status hanya dapat diubah oleh admin</p>
           </div>
 
           <div className="flex gap-3 pt-2">
