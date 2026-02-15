@@ -19,6 +19,7 @@ interface StoreData {
   store_knowledge_base: string;
   store_images: string | any[];
   store_status: string;
+  store_expired_at?: string | null;
   store_type: string;
   store_fulfillment: string | string[] | null;
   store_folder: string;
@@ -203,6 +204,12 @@ function UserDashboard() {
   const whatsappNumber = store.store_whatsapp_jid.replace('@s.whatsapp.net', '');
   const isActive = store.store_status === 'AKTIF';
   const isBotOn = !!store.store_bot_always_on;
+
+  const expiredAt = store.store_expired_at ? new Date(store.store_expired_at) : null;
+  const isExpiringSoon = expiredAt && expiredAt.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
+  const expiredLabel = expiredAt
+    ? expiredAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
   const canUpload = imageData.total_images < imageData.max_images;
   const fulfillmentList = parseFulfillment(store.store_fulfillment);
   const storeTypeLabel = STORE_TYPE_LABELS[store.store_type] || store.store_type || 'store';
@@ -238,6 +245,11 @@ function UserDashboard() {
                 </span>
               </div>
               <p className="text-sm text-[--text-muted] mt-0.5">{store.store_tagline || 'Belum ada tagline'}</p>
+              {expiredLabel && (
+                <p className={`text-xs mt-1 font-medium ${isExpiringSoon ? 'text-amber-400' : 'text-[--text-muted]'}`}>
+                  {isExpiringSoon ? '⚠ ' : ''}Aktif hingga {expiredLabel}
+                </p>
+              )}
               <p className="text-xs text-[--text-muted] mt-1 font-mono">+{whatsappNumber}</p>
             </div>
           </div>
@@ -253,6 +265,7 @@ function UserDashboard() {
         <StatCard
           label="Status Toko"
           value={isActive ? 'Aktif' : 'Nonaktif'}
+          sub={expiredLabel ? `s/d ${expiredLabel}` : undefined}
           icon={CheckCircle2}
           accent={isActive ? 'bg-mint-500/15 text-mint-400' : 'bg-red-500/15 text-red-400'}
         />

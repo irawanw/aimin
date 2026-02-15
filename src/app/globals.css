@@ -32,7 +32,7 @@
     @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl;
   }
   .glass-dark {
-    @apply bg-gray-900/60 backdrop-blur-xl border border-gray-700/40 shadow-xl;
+    @apply bg-[--surface-2] border border-[--border] shadow-xl;
   }
   .btn-primary {
     @apply bg-mint-600 hover:bg-mint-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-mint-600/25 hover:shadow-mint-600/40 active:scale-95;

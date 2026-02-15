@@ -343,7 +343,7 @@ export default function ServicesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-mint-600 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -368,9 +368,9 @@ export default function ServicesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-white">Layanan</h2>
+          <h2 className="text-xl font-semibold text-[--text-primary]">Layanan</h2>
           {services.length > 0 && (
-            <span className="text-xs bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded-full font-medium">
+            <span className="text-xs bg-mint-500/20 text-mint-400 px-2 py-0.5 rounded-full font-medium">
               {services.length}
             </span>
           )}
@@ -389,11 +389,11 @@ export default function ServicesPage() {
       {/* Services grid */}
       {services.length === 0 ? (
         <div className="glass-dark rounded-2xl p-12 text-center">
-          <svg className="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-16 h-16 text-[--text-muted] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          <h3 className="text-gray-400 font-medium mb-1">Belum ada layanan</h3>
-          <p className="text-gray-600 text-sm mb-5">Tambahkan layanan pertama Anda untuk ditampilkan di website.</p>
+          <h3 className="text-[--text-muted] font-medium mb-1">Belum ada layanan</h3>
+          <p className="text-[--text-muted] text-sm mb-5">Tambahkan layanan pertama Anda untuk ditampilkan di website.</p>
           <button onClick={openAddModal} className="btn-primary text-sm !py-2.5 !px-5 inline-flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -417,12 +417,12 @@ export default function ServicesPage() {
                 {confirmDeleteId === svc.id ? (
                   // Delete confirmation overlay
                   <div className="flex-1 flex flex-col items-center justify-center py-4 px-5">
-                    <p className="text-gray-300 text-sm font-medium mb-1">Hapus layanan ini?</p>
-                    <p className="text-gray-500 text-xs mb-4 text-center line-clamp-1">{svc.title}</p>
+                    <p className="text-[--text-secondary] text-sm font-medium mb-1">Hapus layanan ini?</p>
+                    <p className="text-[--text-muted] text-xs mb-4 text-center line-clamp-1">{svc.title}</p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setConfirmDeleteId(null)}
-                        className="px-4 py-2 rounded-xl text-sm text-gray-400 hover:text-gray-200 bg-gray-800 hover:bg-gray-700 transition-colors"
+                        className="px-4 py-2 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                       >
                         Batal
                       </button>
@@ -442,7 +442,7 @@ export default function ServicesPage() {
                   // Normal card content
                   <>
                     {/* Card image thumbnail */}
-                    <div className="w-full h-32 bg-gray-800 overflow-hidden">
+                    <div className="w-full h-32 bg-[--surface-3] overflow-hidden">
                       <img
                         src={getCardImage(svc)}
                         alt={svc.title}
@@ -452,13 +452,13 @@ export default function ServicesPage() {
                     </div>
 
                     <div className="flex-1 min-w-0 p-5 pt-3">
-                      <h4 className="text-gray-100 font-medium text-sm truncate">{svc.title}</h4>
+                      <h4 className="text-[--text-primary] font-medium text-sm truncate">{svc.title}</h4>
                       {svc.description && (
-                        <p className="text-gray-500 text-xs mt-1.5 line-clamp-2 leading-relaxed">{svc.description}</p>
+                        <p className="text-[--text-muted] text-xs mt-1.5 line-clamp-2 leading-relaxed">{svc.description}</p>
                       )}
                       <div className="flex items-center gap-2 mt-3 flex-wrap">
                         {svc.price && (
-                          <span className="text-xs font-medium text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-medium text-mint-400 bg-mint-500/10 px-2 py-0.5 rounded-full">
                             {svc.price}
                           </span>
                         )}
@@ -471,10 +471,10 @@ export default function ServicesPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-1 px-5 pb-4 pt-0 border-t border-gray-800 mt-auto">
+                    <div className="flex items-center gap-1 px-5 pb-4 pt-0 border-t border-[--border] mt-auto">
                       <button
                         onClick={() => openEditModal(svc)}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-brand-400 px-3 py-1.5 rounded-lg hover:bg-brand-500/10 transition-colors"
+                        className="flex items-center gap-1.5 text-xs text-[--text-muted] hover:text-mint-400 px-3 py-1.5 rounded-lg hover:bg-mint-500/10 transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -483,7 +483,7 @@ export default function ServicesPage() {
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(svc.id)}
-                        className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-1.5 text-xs text-[--text-muted] hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -515,15 +515,15 @@ export default function ServicesPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4"
+              className="bg-[--surface-1] border border-[--border] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto mx-4"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal header */}
-              <div className="flex items-center justify-between p-5 border-b border-gray-800">
-                <h3 className="text-lg font-semibold text-white">
+              <div className="flex items-center justify-between p-5 border-b border-[--border]">
+                <h3 className="text-lg font-semibold text-[--text-primary]">
                   {editingService ? 'Edit Layanan' : 'Tambah Layanan'}
                 </h3>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-300 text-xl leading-none">&times;</button>
+                <button onClick={closeModal} className="text-[--text-muted] hover:text-[--text-secondary] text-xl leading-none">&times;</button>
               </div>
 
               {/* Modal body */}
@@ -535,10 +535,10 @@ export default function ServicesPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Judul Layanan <span className="text-red-400">*</span></label>
+                  <label className="block text-sm text-[--text-muted] mb-1.5">Judul Layanan <span className="text-red-400">*</span></label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
                     placeholder="Contoh: Cuci Sepatu Premium"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -548,10 +548,10 @@ export default function ServicesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Deskripsi</label>
+                  <label className="block text-sm text-[--text-muted] mb-1.5">Deskripsi</label>
                   <textarea
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y text-sm"
                     placeholder="Deskripsi singkat layanan Anda"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -559,10 +559,10 @@ export default function ServicesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Harga</label>
+                  <label className="block text-sm text-[--text-muted] mb-1.5">Harga</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
                     placeholder="Rp 100.000"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -571,12 +571,12 @@ export default function ServicesPage() {
 
                 {/* Image Section */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Gambar Layanan</label>
+                  <label className="block text-sm text-[--text-muted] mb-1.5">Gambar Layanan</label>
 
                   {hasImage ? (
                     /* Selected image preview */
                     <div className="space-y-2">
-                      <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
+                      <div className="relative rounded-xl overflow-hidden bg-[--surface-3] border border-[--border]">
                         <img src={currentPreviewSrc!} alt="Preview" className="w-full h-40 object-cover" />
                         <div className="absolute top-2 right-2">
                           <span className={`text-xs ${isCustomUpload ? 'bg-green-500/80' : isSearchImage ? 'bg-blue-500/80' : 'bg-green-500/80'} text-white px-2 py-0.5 rounded-full`}>
@@ -602,7 +602,7 @@ export default function ServicesPage() {
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors text-sm"
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
                           placeholder="Cari gambar... (contoh: salon, food)"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
@@ -612,7 +612,7 @@ export default function ServicesPage() {
                           type="button"
                           onClick={handleImageSearch}
                           disabled={searching || !searchQuery.trim()}
-                          className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
+                          className="px-4 py-2.5 rounded-xl bg-mint-600 hover:bg-mint-700 text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
                         >
                           {searching ? (
                             <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
@@ -627,13 +627,13 @@ export default function ServicesPage() {
 
                       {/* Search results grid */}
                       {searchResults.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto rounded-xl border border-gray-700 p-2 bg-gray-800/50">
+                        <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto rounded-xl border border-[--border] p-2 bg-[--surface-3]/50">
                           {searchResults.map((img) => (
                             <button
                               key={img.id}
                               type="button"
                               onClick={() => handleSelectSearchImage(img)}
-                              className="relative rounded-lg overflow-hidden border-2 border-transparent hover:border-brand-500 transition-colors aspect-[4/3] group"
+                              className="relative rounded-lg overflow-hidden border-2 border-transparent hover:border-mint-500 transition-colors aspect-[4/3] group"
                             >
                               <img src={img.thumb} alt={img.alt} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
@@ -661,7 +661,7 @@ export default function ServicesPage() {
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 transition-colors"
+                          className="text-xs text-mint-400 hover:text-mint-300 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-mint-500/10 hover:bg-mint-500/20 transition-colors"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -678,7 +678,7 @@ export default function ServicesPage() {
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="px-5 py-2.5 rounded-xl text-sm text-gray-400 hover:text-gray-200 bg-gray-800 hover:bg-gray-700 transition-colors"
+                    className="px-5 py-2.5 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                   >
                     Batal
                   </button>

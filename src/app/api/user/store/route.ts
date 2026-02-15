@@ -52,7 +52,8 @@ export async function GET() {
               store_products, store_admin_number, store_bot_always_on, store_email, store_whatsapp_bot, store_updated_at,
               store_id, store_subdomain, store_design_type, store_site_type,
               store_theme_primary, store_theme_background, store_hero_title, store_hero_subtitle,
-              store_hero_image, store_hero_image_keyword, store_about_us
+              store_hero_image, store_hero_image_keyword, store_about_us,
+              store_latitude, store_longitude
        FROM pelanggan WHERE store_whatsapp_jid = ?`,
       [jid]
     );
@@ -85,6 +86,7 @@ export async function PUT(req: Request) {
       'store_subdomain', 'store_design_type', 'store_site_type',
       'store_theme_primary', 'store_theme_background', 'store_hero_title', 'store_hero_subtitle',
       'store_hero_image_keyword', 'store_hero_image', 'store_about_us',
+      'store_latitude', 'store_longitude',
     ];
 
     const updates: string[] = [];
@@ -94,6 +96,23 @@ export async function PUT(req: Request) {
       if (field in body) {
         updates.push(`${field} = ?`);
         values.push(body[field]);
+      }
+    }
+
+    // Auto-geocode when store_address is updated and no manual lat/lng provided
+    if ('store_address' in body && body.store_address && !('store_latitude' in body)) {
+      try {
+        const geoRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(body.store_address)}&format=json&limit=1&countrycodes=id`,
+          { headers: { 'User-Agent': 'AiMinAssist/1.0 (aiminassist.com)' } }
+        );
+        const geoData = await geoRes.json();
+        if (Array.isArray(geoData) && geoData[0]) {
+          updates.push('store_latitude = ?', 'store_longitude = ?');
+          values.push(parseFloat(geoData[0].lat), parseFloat(geoData[0].lon));
+        }
+      } catch {
+        // Geocoding failed silently — save address without coordinates
       }
     }
 

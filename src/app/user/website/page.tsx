@@ -50,8 +50,8 @@ function ColorPicker({ label, value, onChange, presets }: {
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="rounded-xl bg-gray-800 border border-gray-700 p-3 space-y-2.5">
-      <span className="text-xs text-gray-500">{label}</span>
+    <div className="rounded-xl bg-[--surface-3] border border-[--border] p-3 space-y-2.5">
+      <span className="text-xs text-[--text-muted]">{label}</span>
       {/* Swatch + hex input row */}
       <div className="flex items-center gap-2">
         <button
@@ -63,11 +63,11 @@ function ColorPicker({ label, value, onChange, presets }: {
         />
         <input ref={inputRef} type="color" className="sr-only" value={value} onChange={(e) => onChange(e.target.value)} />
         <div className="flex-1 min-w-0 flex rounded-lg overflow-hidden border border-gray-600">
-          <span className="px-2 py-2 bg-gray-700 text-gray-500 text-xs select-none">#</span>
+          <span className="px-2 py-2 bg-[--surface-3] text-[--text-muted] text-xs select-none">#</span>
           <input
             type="text"
             maxLength={7}
-            className="flex-1 min-w-0 px-2 py-2 bg-gray-900 text-gray-100 font-mono text-sm outline-none"
+            className="flex-1 min-w-0 px-2 py-2 bg-[--surface-1] text-[--text-primary] font-mono text-sm outline-none"
             value={value.replace('#', '')}
             onChange={(e) => {
               const v = e.target.value.replace(/[^0-9a-fA-F]/g, '');
@@ -255,7 +255,7 @@ export default function WebsitePage() {
     setSaving(false);
   }
 
-  if (loading) return <div className="text-gray-400">Loading...</div>;
+  if (loading) return <div className="text-[--text-muted]">Loading...</div>;
 
   const previewUrl = form.store_subdomain ? `${form.store_subdomain}.aiminassist.com` : null;
 
@@ -277,7 +277,7 @@ export default function WebsitePage() {
       {/* Website Settings Form */}
       <div className="glass-dark rounded-2xl p-6">
         <h3 className="text-white font-semibold mb-5 flex items-center gap-2">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
           Pengaturan Website
@@ -286,36 +286,36 @@ export default function WebsitePage() {
         <form onSubmit={handleSave} className="space-y-4">
           {/* Subdomain */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Subdomain</label>
-            <div className="flex rounded-xl overflow-hidden border border-gray-700 focus-within:border-brand-500 transition-colors">
+            <label className="block text-sm text-[--text-muted] mb-1">Subdomain</label>
+            <div className="flex rounded-xl overflow-hidden border border-[--border] focus-within:border-mint-500 transition-colors">
               <input
                 type="text"
-                className="flex-1 min-w-0 px-4 py-2.5 bg-gray-800 text-gray-100 outline-none"
+                className="flex-1 min-w-0 px-4 py-2.5 bg-[--surface-3] text-[--text-primary] outline-none"
                 value={form.store_subdomain}
                 onChange={(e) => setForm({ ...form, store_subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                 placeholder="nama-toko"
               />
-              <span className="px-3 py-2.5 bg-gray-700/80 text-gray-400 text-xs sm:text-sm whitespace-nowrap flex items-center border-l border-gray-700 select-none">.aiminassist.com</span>
+              <span className="px-3 py-2.5 bg-[--surface-3]/80 text-[--text-muted] text-xs sm:text-sm whitespace-nowrap flex items-center border-l border-[--border] select-none">.aiminassist.com</span>
             </div>
-            <p className="text-xs text-gray-600 mt-1">Hanya huruf kecil, angka, dan strip (-)</p>
+            <p className="text-xs text-[--text-muted] mt-1">Hanya huruf kecil, angka, dan strip (-)</p>
           </div>
 
           {/* Design Template */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Template Desain</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Template Desain</label>
             <select
-              className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 outline-none transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 outline-none transition-colors"
               value={form.store_design_type}
               onChange={(e) => setForm({ ...form, store_design_type: e.target.value })}
             >
               {DESIGN_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-            <p className="text-xs text-gray-600 mt-1">Pilih template tampilan website Anda</p>
+            <p className="text-xs text-[--text-muted] mt-1">Pilih template tampilan website Anda</p>
           </div>
 
           {/* Theme Colors */}
           <div>
-            <label className="block text-sm text-gray-400 mb-3">Warna Tema</label>
+            <label className="block text-sm text-[--text-muted] mb-3">Warna Tema</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ColorPicker
                 label="Warna Utama"
@@ -334,49 +334,49 @@ export default function WebsitePage() {
 
           {/* Hero Section */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Judul Hero</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Judul Hero</label>
             <input
               type="text"
-              className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors"
               value={form.store_hero_title}
               onChange={(e) => setForm({ ...form, store_hero_title: e.target.value })}
               placeholder="Selamat datang di toko kami"
             />
-            <p className="text-xs text-gray-600 mt-1">Judul utama yang tampil di bagian atas website</p>
+            <p className="text-xs text-[--text-muted] mt-1">Judul utama yang tampil di bagian atas website</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Subtitle Hero</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Subtitle Hero</label>
             <input
               type="text"
-              className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors"
               value={form.store_hero_subtitle}
               onChange={(e) => setForm({ ...form, store_hero_subtitle: e.target.value })}
               placeholder="Deskripsi singkat tentang toko Anda"
             />
-            <p className="text-xs text-gray-600 mt-1">Teks pendukung di bawah judul hero</p>
+            <p className="text-xs text-[--text-muted] mt-1">Teks pendukung di bawah judul hero</p>
           </div>
 
           {/* About Us */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Tentang Kami</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Tentang Kami</label>
             <textarea
               rows={5}
-              className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y"
+              className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y"
               value={form.store_about_us}
               onChange={(e) => setForm({ ...form, store_about_us: e.target.value })}
               placeholder="Ceritakan sejarah, visi, dan nilai-nilai toko Anda..."
             />
-            <p className="text-xs text-gray-600 mt-1">Ditampilkan di halaman About pada website Anda</p>
+            <p className="text-xs text-[--text-muted] mt-1">Ditampilkan di halaman About pada website Anda</p>
           </div>
 
           {/* Hero Image */}
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Gambar Hero</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Gambar Hero</label>
 
             {hasHeroImage ? (
               <div className="space-y-2">
-                <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
+                <div className="relative rounded-xl overflow-hidden bg-[--surface-3] border border-[--border]">
                   <img src={heroCurrentSrc!} alt="Hero preview" className="w-full h-48 object-cover" />
                   <div className="absolute top-2 right-2">
                     <span className={`text-xs ${isHeroUpload ? 'bg-green-500/80' : isHeroSearch ? 'bg-blue-500/80' : 'bg-green-500/80'} text-white px-2 py-0.5 rounded-full`}>
@@ -401,7 +401,7 @@ export default function WebsitePage() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors text-sm"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
                     placeholder="Cari gambar hero... (contoh: salon, office)"
                     value={heroSearchQuery}
                     onChange={(e) => setHeroSearchQuery(e.target.value)}
@@ -411,7 +411,7 @@ export default function WebsitePage() {
                     type="button"
                     onClick={handleHeroSearch}
                     disabled={heroSearching || !heroSearchQuery.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
+                    className="px-4 py-2.5 rounded-xl bg-mint-600 hover:bg-mint-700 text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
                   >
                     {heroSearching ? (
                       <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
@@ -426,13 +426,13 @@ export default function WebsitePage() {
 
                 {/* Search results grid */}
                 {heroSearchResults.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto rounded-xl border border-gray-700 p-2 bg-gray-800/50">
+                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto rounded-xl border border-[--border] p-2 bg-[--surface-3]/50">
                     {heroSearchResults.map((img) => (
                       <button
                         key={img.id}
                         type="button"
                         onClick={() => handleSelectHeroSearchImage(img)}
-                        className="relative rounded-lg overflow-hidden border-2 border-transparent hover:border-brand-500 transition-colors aspect-[4/3] group"
+                        className="relative rounded-lg overflow-hidden border-2 border-transparent hover:border-mint-500 transition-colors aspect-[4/3] group"
                       >
                         <img src={img.thumb} alt={img.alt} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
@@ -460,7 +460,7 @@ export default function WebsitePage() {
                   <button
                     type="button"
                     onClick={() => heroFileInputRef.current?.click()}
-                    className="text-xs text-brand-400 hover:text-brand-300 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 transition-colors"
+                    className="text-xs text-mint-400 hover:text-mint-300 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-mint-500/10 hover:bg-mint-500/20 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -470,19 +470,19 @@ export default function WebsitePage() {
                 </div>
               </div>
             )}
-            <p className="text-xs text-gray-600 mt-1">Gambar latar belakang di bagian hero website</p>
+            <p className="text-xs text-[--text-muted] mt-1">Gambar latar belakang di bagian hero website</p>
           </div>
 
           {/* Preview Link */}
           {previewUrl && (
-            <div className="bg-gray-800/50 rounded-xl px-4 py-3 flex items-center justify-between">
+            <div className="bg-[--surface-3]/50 rounded-xl px-4 py-3 flex items-center justify-between">
               <div>
-                <span className="text-xs text-gray-500 block">Preview URL</span>
+                <span className="text-xs text-[--text-muted] block">Preview URL</span>
                 <a
                   href={`https://${previewUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors"
+                  className="text-mint-400 hover:text-mint-300 text-sm font-medium transition-colors"
                 >
                   {previewUrl}
                   <svg className="w-3.5 h-3.5 inline-block ml-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,15 +505,15 @@ export default function WebsitePage() {
       {/* Link to Services page */}
       <div className="glass-dark rounded-2xl p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
           <div>
-            <span className="text-gray-200 text-sm font-medium">Layanan</span>
-            <p className="text-gray-500 text-xs">Kelola layanan yang ditampilkan di website Anda</p>
+            <span className="text-[--text-primary] text-sm font-medium">Layanan</span>
+            <p className="text-[--text-muted] text-xs">Kelola layanan yang ditampilkan di website Anda</p>
           </div>
         </div>
-        <a href="/user/services" className="text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors flex items-center gap-1">
+        <a href="/user/services" className="text-mint-400 hover:text-mint-300 text-sm font-medium transition-colors flex items-center gap-1">
           Kelola
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

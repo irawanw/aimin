@@ -75,9 +75,9 @@ function formatCurrency(val: string | number) {
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   return (
     <div className="glass-dark rounded-2xl p-5">
-      <p className="text-gray-500 text-sm">{label}</p>
-      <p className={`text-3xl font-bold mt-1 ${color || 'text-white'}`}>{value}</p>
-      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+      <p className="text-[--text-muted] text-sm">{label}</p>
+      <p className={`text-3xl font-bold mt-1 ${color || 'text-[--text-primary]'}`}>{value}</p>
+      {sub && <p className="text-[--text-muted] text-xs mt-1">{sub}</p>}
     </div>
   );
 }
@@ -155,8 +155,8 @@ export default function ConversationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Statistik Percakapan</h2>
-          <p className="text-gray-400 text-sm mt-1">Data percakapan bot WhatsApp</p>
+          <h2 className="text-2xl font-bold text-[--text-primary]">Statistik Percakapan</h2>
+          <p className="text-[--text-muted] text-sm mt-1">Data percakapan bot WhatsApp</p>
         </div>
 
         {/* Filters */}
@@ -165,7 +165,7 @@ export default function ConversationsPage() {
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${period === p.value ? 'bg-brand-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${period === p.value ? 'bg-mint-600 text-[--text-primary]' : 'bg-[--surface-3] text-[--text-muted] hover:text-[--text-primary]'}`}
             >
               {p.label}
             </button>
@@ -176,27 +176,27 @@ export default function ConversationsPage() {
       {/* Date range */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Dari</label>
+          <label className="text-xs text-[--text-muted] whitespace-nowrap">Dari</label>
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-brand-500 w-36"
+            className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 w-36"
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Sampai</label>
+          <label className="text-xs text-[--text-muted] whitespace-nowrap">Sampai</label>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-brand-500 w-36"
+            className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 w-36"
           />
         </div>
         {(from || to) && (
           <button
             onClick={() => { setFrom(''); setTo(''); }}
-            className="text-xs text-gray-500 hover:text-gray-300 underline"
+            className="text-xs text-[--text-muted] hover:text-[--text-secondary] underline"
           >
             Reset
           </button>
@@ -214,7 +214,7 @@ export default function ConversationsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Percakapan" value={stats.total_conversations.toLocaleString()} />
           <StatCard label="Total Booking" value={stats.total_bookings.toLocaleString()} color="text-green-400" />
-          <StatCard label="Booking Rate" value={`${stats.booking_rate}%`} color="text-brand-400" />
+          <StatCard label="Booking Rate" value={`${stats.booking_rate}%`} color="text-mint-400" />
           <StatCard label="Rata-rata Pesan" value={stats.avg_messages || '-'} sub="per percakapan" />
         </div>
       ) : null}
@@ -235,7 +235,7 @@ export default function ConversationsPage() {
                     <div className="relative flex items-end gap-0.5" style={{ height: '128px' }}>
                       <div
                         title={`${row.conversations} percakapan`}
-                        className="bg-brand-600/70 hover:bg-brand-500 rounded-t transition-colors"
+                        className="bg-mint-600/70 hover:bg-mint-500 rounded-t transition-colors"
                         style={{ width: '14px', height: `${height}%`, minHeight: row.conversations > 0 ? '4px' : '0' }}
                       />
                       <div
@@ -244,7 +244,7 @@ export default function ConversationsPage() {
                         style={{ width: '14px', height: `${bHeight}%`, minHeight: row.bookings > 0 ? '4px' : '0' }}
                       />
                     </div>
-                    <span className="text-[9px] text-gray-600 rotate-45 origin-left whitespace-nowrap translate-y-2">
+                    <span className="text-[9px] text-[--text-muted] rotate-45 origin-left whitespace-nowrap translate-y-2">
                       {row.date.slice(5)}
                     </span>
                   </div>
@@ -252,8 +252,8 @@ export default function ConversationsPage() {
               })}
             </div>
           </div>
-          <div className="flex gap-4 mt-6 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-brand-600/70 inline-block" /> Percakapan</span>
+          <div className="flex gap-4 mt-6 text-xs text-[--text-muted]">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-mint-600/70 inline-block" /> Percakapan</span>
             <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500/80 inline-block" /> Booking</span>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function ConversationsPage() {
             <select
               value={bookingFilter}
               onChange={(e) => setBookingFilter(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-gray-200 focus:outline-none"
+              className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none"
             >
               <option value="">Semua</option>
               <option value="1">Booking Berhasil</option>
@@ -279,23 +279,23 @@ export default function ConversationsPage() {
         {sessionsLoading ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-800 rounded-lg animate-pulse" />
+              <div key={i} className="h-12 bg-[--surface-3] rounded-lg animate-pulse" />
             ))}
           </div>
         ) : !sessions || sessions.sessions.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="w-12 h-12 mx-auto text-gray-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-12 h-12 mx-auto text-[--text-muted] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <p className="text-gray-500">Belum ada data percakapan</p>
-            <p className="text-gray-600 text-sm mt-1">Bot akan mengirim data setiap 5 menit</p>
+            <p className="text-[--text-muted]">Belum ada data percakapan</p>
+            <p className="text-[--text-muted] text-sm mt-1">Bot akan mengirim data setiap 5 menit</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-gray-500 border-b border-gray-800">
+                  <tr className="text-left text-xs text-[--text-muted] border-b border-[--border]">
                     <th className="pb-3 pr-3">Customer</th>
                     <th className="pb-3 pr-3">Mulai</th>
                     <th className="pb-3 pr-3 text-center">Pesan</th>
@@ -305,33 +305,33 @@ export default function ConversationsPage() {
                     <th className="pb-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800/50">
+                <tbody className="divide-y divide-[--border]/50">
                   {sessions.sessions.map((s) => (
-                    <tr key={s.session_key} className="hover:bg-gray-800/30 transition-colors">
+                    <tr key={s.session_key} className="hover:bg-[--surface-3]/30 transition-colors">
                       <td className="py-3 pr-3">
-                        <span className="text-gray-200 font-mono text-xs">{s.customer_ref || s.session_key.slice(0, 16) + '…'}</span>
+                        <span className="text-[--text-primary] font-mono text-xs">{s.customer_ref || s.session_key.slice(0, 16) + '…'}</span>
                       </td>
-                      <td className="py-3 pr-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(s.started_at)}</td>
+                      <td className="py-3 pr-3 text-[--text-muted] text-xs whitespace-nowrap">{formatDate(s.started_at)}</td>
                       <td className="py-3 pr-3 text-center">
-                        <span className="text-gray-300">{s.msg_count}</span>
+                        <span className="text-[--text-secondary]">{s.msg_count}</span>
                       </td>
                       <td className="py-3 pr-3 text-center">
                         {s.booking_success ? (
                           <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">Ya</span>
                         ) : (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-500">-</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-[--surface-3] text-[--text-muted]">-</span>
                         )}
                       </td>
-                      <td className="py-3 pr-3 text-gray-300 text-xs">{formatCurrency(s.order_total)}</td>
+                      <td className="py-3 pr-3 text-[--text-secondary] text-xs">{formatCurrency(s.order_total)}</td>
                       <td className="py-3 pr-3 text-center">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'completed' ? 'bg-blue-500/20 text-blue-400' : s.status === 'active' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-500'}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === 'completed' ? 'bg-blue-500/20 text-blue-400' : s.status === 'active' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-[--surface-3] text-[--text-muted]'}`}>
                           {s.status}
                         </span>
                       </td>
                       <td className="py-3">
                         <button
                           onClick={() => openDetail(s.session_key)}
-                          className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                          className="text-xs text-mint-400 hover:text-mint-300 transition-colors"
                         >
                           Detail
                         </button>
@@ -343,22 +343,22 @@ export default function ConversationsPage() {
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-800">
-              <span className="text-xs text-gray-500">
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-[--border]">
+              <span className="text-xs text-[--text-muted]">
                 {offset + 1}–{Math.min(offset + LIMIT, sessions.total)} dari {sessions.total}
               </span>
               <div className="flex gap-2">
                 <button
                   disabled={offset === 0}
                   onClick={() => fetchSessions(offset - LIMIT)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[--surface-3] text-[--text-muted] hover:text-[--text-primary] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Sebelumnya
                 </button>
                 <button
                   disabled={offset + LIMIT >= sessions.total}
                   onClick={() => fetchSessions(offset + LIMIT)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[--surface-3] text-[--text-muted] hover:text-[--text-primary] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Berikutnya
                 </button>
@@ -372,41 +372,41 @@ export default function ConversationsPage() {
       {(detail || detailLoading) && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setDetail(null)}>
           <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
+            className="bg-[--surface-1] border border-[--border] rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
+            <div className="flex items-center justify-between p-4 border-b border-[--border]">
               <h4 className="text-white font-semibold text-sm">Detail Percakapan</h4>
-              <button onClick={() => setDetail(null)} className="text-gray-500 hover:text-gray-300 text-xl leading-none">&times;</button>
+              <button onClick={() => setDetail(null)} className="text-[--text-muted] hover:text-[--text-secondary] text-xl leading-none">&times;</button>
             </div>
 
             {detailLoading ? (
               <div className="flex items-center justify-center py-16">
-                <span className="animate-spin w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full" />
+                <span className="animate-spin w-6 h-6 border-2 border-mint-500 border-t-transparent rounded-full" />
               </div>
             ) : detail ? (
               <>
                 {/* Session Meta */}
-                <div className="p-4 border-b border-gray-800 text-xs text-gray-400 grid grid-cols-2 gap-2">
-                  <span>Customer: <span className="text-gray-200">{detail.session.customer_ref || '-'}</span></span>
-                  <span>Status: <span className="text-gray-200">{detail.session.status}</span></span>
-                  <span>Mulai: <span className="text-gray-200">{formatDate(detail.session.started_at)}</span></span>
-                  <span>Booking: <span className={detail.session.booking_success ? 'text-green-400' : 'text-gray-400'}>{detail.session.booking_success ? 'Ya' : 'Tidak'}</span></span>
+                <div className="p-4 border-b border-[--border] text-xs text-[--text-muted] grid grid-cols-2 gap-2">
+                  <span>Customer: <span className="text-[--text-primary]">{detail.session.customer_ref || '-'}</span></span>
+                  <span>Status: <span className="text-[--text-primary]">{detail.session.status}</span></span>
+                  <span>Mulai: <span className="text-[--text-primary]">{formatDate(detail.session.started_at)}</span></span>
+                  <span>Booking: <span className={detail.session.booking_success ? 'text-green-400' : 'text-[--text-muted]'}>{detail.session.booking_success ? 'Ya' : 'Tidak'}</span></span>
                   {detail.session.order_total && parseFloat(detail.session.order_total) > 0 && (
-                    <span className="col-span-2">Total: <span className="text-gray-200">{formatCurrency(detail.session.order_total)}</span></span>
+                    <span className="col-span-2">Total: <span className="text-[--text-primary]">{formatCurrency(detail.session.order_total)}</span></span>
                   )}
                 </div>
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {detail.messages.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-4">Tidak ada pesan tersimpan</p>
+                    <p className="text-[--text-muted] text-sm text-center py-4">Tidak ada pesan tersimpan</p>
                   ) : detail.messages.map((msg, i) => (
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${msg.role === 'user' ? 'bg-brand-600/30 text-gray-200 rounded-tr-sm' : 'bg-gray-800 text-gray-300 rounded-tl-sm'}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${msg.role === 'user' ? 'bg-mint-600/30 text-[--text-primary] rounded-tr-sm' : 'bg-[--surface-3] text-[--text-secondary] rounded-tl-sm'}`}>
                         <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-                        <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-brand-400/70 text-right' : 'text-gray-600'}`}>
+                        <p className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-mint-400/70 text-right' : 'text-[--text-muted]'}`}>
                           {formatDate(msg.sent_at)}
                         </p>
                       </div>

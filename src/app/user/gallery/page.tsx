@@ -132,7 +132,7 @@ export default function GalleryPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-mint-600 border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -157,9 +157,9 @@ export default function GalleryPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-white">Gallery</h2>
+          <h2 className="text-xl font-semibold text-[--text-primary]">Gallery</h2>
           {items.length > 0 && (
-            <span className="text-xs bg-brand-500/20 text-brand-400 px-2 py-0.5 rounded-full font-medium">
+            <span className="text-xs bg-mint-500/20 text-mint-400 px-2 py-0.5 rounded-full font-medium">
               {items.length}
             </span>
           )}
@@ -178,10 +178,10 @@ export default function GalleryPage() {
       {/* Items */}
       {items.length === 0 ? (
         <div className="glass-dark rounded-2xl p-12 text-center">
-          <p className="text-gray-400">Belum ada item di gallery.</p>
+          <p className="text-[--text-muted]">Belum ada item di gallery.</p>
           <button
             onClick={() => openModal()}
-            className="mt-4 text-brand-400 hover:text-brand-300 font-medium"
+            className="mt-4 text-mint-400 hover:text-mint-300 font-medium"
           >
             + Tambah Item Pertama
           </button>
@@ -189,8 +189,8 @@ export default function GalleryPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((item) => (
-            <div key={item.id} className="glass-dark rounded-xl overflow-hidden group hover:ring-2 hover:ring-brand-500/50 transition-all">
-              <div className="relative h-40 overflow-hidden bg-gray-800">
+            <div key={item.id} className="glass-dark rounded-xl overflow-hidden group hover:ring-2 hover:ring-mint-500/50 transition-all">
+              <div className="relative h-40 overflow-hidden bg-[--surface-3]">
                 {item.image_url ? (
                   <img
                     src={item.image_url.startsWith('http') ? item.image_url : item.image_url}
@@ -199,7 +199,7 @@ export default function GalleryPage() {
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-600">
+                  <div className="w-full h-full flex items-center justify-center text-[--text-muted]">
                     <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -208,14 +208,14 @@ export default function GalleryPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent" />
               </div>
               <div className="p-3">
-                <h3 className="font-medium text-white mb-1 truncate">{item.title}</h3>
+                <h3 className="font-medium text-[--text-primary] mb-1 truncate">{item.title}</h3>
                 {item.description && (
-                  <p className="text-xs text-gray-400 line-clamp-2 mb-3">{item.description}</p>
+                  <p className="text-xs text-[--text-muted] line-clamp-2 mb-3">{item.description}</p>
                 )}
                 <div className="flex gap-2">
                   <button
                     onClick={() => openModal(item)}
-                    className="flex-1 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg transition-colors"
+                    className="flex-1 px-3 py-1.5 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] text-xs rounded-lg transition-colors"
                   >
                     Edit
                   </button>
@@ -248,12 +248,12 @@ export default function GalleryPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-dark rounded-2xl p-6 w-full max-w-md"
             >
-              <h2 className="text-xl font-bold text-white mb-4">
+              <h2 className="text-xl font-bold text-[--text-primary] mb-4">
                 {editingItem ? 'Edit Item' : 'Tambah Item'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Gambar</label>
+                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Gambar</label>
                   {form.image_url ? (
                     <div className="relative">
                       <img
@@ -275,43 +275,43 @@ export default function GalleryPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-brand-400 file:bg-brand-900/20"
+                      className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-mint-400 file:bg-mint-900/20"
                     />
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Judul *</label>
+                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Judul *</label>
                   <input
                     type="text"
                     required
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     placeholder="Nama item"
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+                    className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white placeholder-[--text-muted] focus:border-mint-500/60 focus:ring-2 focus:ring-mint-500/20 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Deskripsi</label>
+                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Deskripsi</label>
                   <textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Deskripsi singkat"
                     rows={3}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all resize-none"
+                    className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white placeholder-[--text-muted] focus:border-mint-500/60 focus:ring-2 focus:ring-mint-500/20 outline-none transition-all resize-none"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] rounded-lg transition-colors"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={saving || !form.title.trim()}
-                    className="flex-1 px-4 py-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:hover:bg-brand-600 text-white rounded-lg transition-colors font-medium"
+                    className="flex-1 px-4 py-2 bg-mint-600 hover:bg-mint-500 disabled:opacity-50 disabled:hover:bg-mint-600 text-white rounded-lg transition-colors font-medium"
                   >
                     {saving ? 'Menyimpan...' : 'Simpan'}
                   </button>
@@ -338,12 +338,12 @@ export default function GalleryPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-dark rounded-2xl p-6 w-full max-w-sm"
             >
-              <h2 className="text-lg font-bold text-white mb-2">Hapus Item?</h2>
-              <p className="text-gray-400 mb-6">Apakah Anda yakin ingin menghapus item ini?</p>
+              <h2 className="text-lg font-bold text-[--text-primary] mb-2">Hapus Item?</h2>
+              <p className="text-[--text-muted] mb-6">Apakah Anda yakin ingin menghapus item ini?</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] rounded-lg transition-colors"
                 >
                   Batal
                 </button>

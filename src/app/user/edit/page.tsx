@@ -343,7 +343,7 @@ export default function UserEditPage() {
     }
   };
 
-  if (loading) return <div className="text-gray-400">Loading...</div>;
+  if (loading) return <div className="text-[--text-muted]">Loading...</div>;
 
   const canUpload = imageData.total_images < imageData.max_images;
   const remaining = imageData.max_images - imageData.total_images;
@@ -368,28 +368,28 @@ export default function UserEditPage() {
         <h3 className="text-white font-semibold mb-5">Edit Informasi Toko</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nomor WhatsApp</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-500 cursor-not-allowed" value={whatsappNumber} disabled />
-            <p className="text-xs text-gray-600 mt-1">Nomor WhatsApp tidak dapat diubah</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Nomor WhatsApp</label>
+            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-muted] cursor-not-allowed" value={whatsappNumber} disabled />
+            <p className="text-xs text-[--text-muted] mt-1">Nomor WhatsApp tidak dapat diubah</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nama Toko *</label>
-            <input type="text" required className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_name} onChange={(e) => setForm({ ...form, store_name: e.target.value })} />
+            <label className="block text-sm text-[--text-muted] mb-1">Nama Toko *</label>
+            <input type="text" required className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors" value={form.store_name} onChange={(e) => setForm({ ...form, store_name: e.target.value })} />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Tipe Toko</label>
-            <select className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 outline-none transition-colors" value={form.store_type} onChange={(e) => setForm({ ...form, store_type: e.target.value, store_fulfillment: [] })}>
+            <label className="block text-sm text-[--text-muted] mb-1">Tipe Toko</label>
+            <select className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 outline-none transition-colors" value={form.store_type} onChange={(e) => setForm({ ...form, store_type: e.target.value, store_fulfillment: [] })}>
               {STORE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-            <p className="text-xs text-gray-600 mt-1">Pilih jenis usaha Anda</p>
+            <p className="text-xs text-[--text-muted] mt-1">Pilih jenis usaha Anda</p>
           </div>
 
           {/* Fulfillment Options */}
           {(form.store_type === 'store' || form.store_type === 'services') && (
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-sm text-[--text-muted] mb-2">
                 {form.store_type === 'store' ? 'Metode Pengiriman' : 'Metode Layanan'}
               </label>
               <div className="space-y-2">
@@ -397,7 +397,7 @@ export default function UserEditPage() {
                   <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500/20 focus:ring-2"
+                      className="w-4 h-4 rounded border-gray-600 bg-[--surface-3] text-mint-500 focus:ring-mint-500/20 focus:ring-2"
                       checked={form.store_fulfillment.includes(opt.value)}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -407,11 +407,11 @@ export default function UserEditPage() {
                         }
                       }}
                     />
-                    <span className="text-gray-300 text-sm">{opt.label}</span>
+                    <span className="text-[--text-secondary] text-sm">{opt.label}</span>
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-[--text-muted] mt-2">
                 {form.store_type === 'store'
                   ? 'Pilih metode pengiriman yang tersedia di toko Anda'
                   : 'Pilih metode layanan yang tersedia untuk jasa Anda'}
@@ -420,65 +420,65 @@ export default function UserEditPage() {
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nama Admin AI</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_admin} onChange={(e) => setForm({ ...form, store_admin: e.target.value })} />
-            <p className="text-xs text-gray-600 mt-1">Nama yang akan digunakan AI saat membalas chat</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Nama Admin AI</label>
+            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors" value={form.store_admin} onChange={(e) => setForm({ ...form, store_admin: e.target.value })} />
+            <p className="text-xs text-[--text-muted] mt-1">Nama yang akan digunakan AI saat membalas chat</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Nomor Admin</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_admin_number} onChange={(e) => setForm({ ...form, store_admin_number: e.target.value })} placeholder="e.g. 628123456789" />
-            <p className="text-xs text-gray-600 mt-1">Nomor telepon admin untuk notifikasi</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Nomor Admin</label>
+            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors" value={form.store_admin_number} onChange={(e) => setForm({ ...form, store_admin_number: e.target.value })} placeholder="e.g. 628123456789" />
+            <p className="text-xs text-[--text-muted] mt-1">Nomor telepon admin untuk notifikasi</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
-            <input type="email" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_email} onChange={(e) => setForm({ ...form, store_email: e.target.value })} placeholder="email@example.com" />
-            <p className="text-xs text-gray-600 mt-1">Alamat email untuk keperluan bisnis</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Email</label>
+            <input type="email" className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors" value={form.store_email} onChange={(e) => setForm({ ...form, store_email: e.target.value })} placeholder="email@example.com" />
+            <p className="text-xs text-[--text-muted] mt-1">Alamat email untuk keperluan bisnis</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Bot Always On</label>
+            <label className="block text-sm text-[--text-muted] mb-1">Bot Always On</label>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={!!form.store_bot_always_on} onChange={(e) => setForm({ ...form, store_bot_always_on: e.target.checked ? 1 : 0 })} />
-              <div className="w-11 h-6 bg-gray-700 peer-focus:ring-2 peer-focus:ring-brand-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-              <span className="ml-3 text-sm text-gray-400">Aktifkan bot untuk selalu merespon</span>
+              <div className="w-11 h-6 bg-[--surface-3] peer-focus:ring-2 peer-focus:ring-mint-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-600"></div>
+              <span className="ml-3 text-sm text-[--text-muted]">Aktifkan bot untuk selalu merespon</span>
             </label>
-            <p className="text-xs text-gray-600 mt-1">Jika diaktifkan, bot akan selalu merespon pesan masuk</p>
+            <p className="text-xs text-[--text-muted] mt-1">Jika diaktifkan, bot akan selalu merespon pesan masuk</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">WhatsApp Bot</label>
+            <label className="block text-sm text-[--text-muted] mb-1">WhatsApp Bot</label>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={!!form.store_whatsapp_bot} onChange={(e) => setForm({ ...form, store_whatsapp_bot: e.target.checked ? 1 : 0 })} />
-              <div className="w-11 h-6 bg-gray-700 peer-focus:ring-2 peer-focus:ring-brand-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-              <span className="ml-3 text-sm text-gray-400">Aktifkan WhatsApp bot</span>
+              <div className="w-11 h-6 bg-[--surface-3] peer-focus:ring-2 peer-focus:ring-mint-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-mint-600"></div>
+              <span className="ml-3 text-sm text-[--text-muted]">Aktifkan WhatsApp bot</span>
             </label>
-            <p className="text-xs text-gray-600 mt-1">Jika dinonaktifkan, bot tidak akan memproses pesan WhatsApp</p>
+            <p className="text-xs text-[--text-muted] mt-1">Jika dinonaktifkan, bot tidak akan memproses pesan WhatsApp</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Tagline</label>
-            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors" value={form.store_tagline} onChange={(e) => setForm({ ...form, store_tagline: e.target.value })} />
-            <p className="text-xs text-gray-600 mt-1">Slogan atau tagline toko Anda</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Tagline</label>
+            <input type="text" className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors" value={form.store_tagline} onChange={(e) => setForm({ ...form, store_tagline: e.target.value })} />
+            <p className="text-xs text-[--text-muted] mt-1">Slogan atau tagline toko Anda</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Alamat Toko</label>
-            <textarea rows={3} className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y" value={form.store_address} onChange={(e) => setForm({ ...form, store_address: e.target.value })} />
-            <p className="text-xs text-gray-600 mt-1">Alamat lengkap toko atau lokasi pengiriman Anda</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Alamat Toko</label>
+            <textarea rows={3} className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y" value={form.store_address} onChange={(e) => setForm({ ...form, store_address: e.target.value })} />
+            <p className="text-xs text-[--text-muted] mt-1">Alamat lengkap toko atau lokasi pengiriman Anda</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Fitur Produk</label>
-            <textarea rows={4} className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y" value={form.store_feature} onChange={(e) => setForm({ ...form, store_feature: e.target.value })} />
-            <p className="text-xs text-gray-600 mt-1">Jelaskan fitur-fitur unggulan produk Anda</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Fitur Produk</label>
+            <textarea rows={4} className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y" value={form.store_feature} onChange={(e) => setForm({ ...form, store_feature: e.target.value })} />
+            <p className="text-xs text-[--text-muted] mt-1">Jelaskan fitur-fitur unggulan produk Anda</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Knowledge Base</label>
-            <textarea rows={6} className="w-full px-4 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-gray-100 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-colors resize-y" value={form.store_knowledge_base} onChange={(e) => setForm({ ...form, store_knowledge_base: e.target.value })} />
-            <p className="text-xs text-gray-600 mt-1">Informasi lengkap tentang produk, harga, cara order, dll yang akan digunakan AI untuk menjawab pertanyaan pelanggan</p>
+            <label className="block text-sm text-[--text-muted] mb-1">Knowledge Base</label>
+            <textarea rows={6} className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y" value={form.store_knowledge_base} onChange={(e) => setForm({ ...form, store_knowledge_base: e.target.value })} />
+            <p className="text-xs text-[--text-muted] mt-1">Informasi lengkap tentang produk, harga, cara order, dll yang akan digunakan AI untuk menjawab pertanyaan pelanggan</p>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -494,12 +494,12 @@ export default function UserEditPage() {
       <div className="glass-dark rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-semibold flex items-center gap-2">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Foto Produk
           </h3>
-          <span className="text-xs font-medium text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
+          <span className="text-xs font-medium text-[--text-muted] bg-[--surface-3] px-3 py-1 rounded-full">
             {imageData.total_images} / {imageData.max_images}
           </span>
         </div>
@@ -527,7 +527,7 @@ export default function UserEditPage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.url}
-                    className="w-full h-28 object-cover rounded-xl border border-gray-700"
+                    className="w-full h-28 object-cover rounded-xl border border-[--border]"
                     alt={img.filename}
                     loading="lazy"
                   />
@@ -546,7 +546,7 @@ export default function UserEditPage() {
                     )}
                   </button>
                 </div>
-                <div className="text-center text-[11px] text-gray-500 mt-1 truncate">{img.filename}</div>
+                <div className="text-center text-[11px] text-[--text-muted] mt-1 truncate">{img.filename}</div>
 
                 {/* Product Tag Dropdown */}
                 {imageData.products.length > 0 && (
@@ -554,7 +554,7 @@ export default function UserEditPage() {
                     value={img.product || ''}
                     onChange={(e) => handleTagChange(img.filename, e.target.value)}
                     disabled={taggingFile === img.filename}
-                    className="mt-1 w-full text-xs px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none disabled:opacity-50 transition-colors"
+                    className="mt-1 w-full text-xs px-2 py-1.5 rounded-lg bg-[--surface-3] border border-[--border] text-[--text-secondary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none disabled:opacity-50 transition-colors"
                   >
                     <option value="">-- Pilih Produk --</option>
                     {imageData.products.map((p) => (
@@ -571,15 +571,15 @@ export default function UserEditPage() {
 
         {/* Empty state */}
         {imageLoaded && imageData.images.length === 0 && (
-          <p className="text-gray-500 text-sm mb-4">Belum ada foto produk</p>
+          <p className="text-[--text-muted] text-sm mb-4">Belum ada foto produk</p>
         )}
 
         {/* Upload Section */}
         {canUpload ? (
           <div>
-            <hr className="border-gray-800 mb-4" />
-            <h4 className="text-gray-300 text-sm font-medium mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <hr className="border-[--border] mb-4" />
+            <h4 className="text-[--text-secondary] text-sm font-medium mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               Upload Foto Baru
@@ -588,8 +588,8 @@ export default function UserEditPage() {
             <div
               className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
                 dragOver
-                  ? 'border-brand-400 bg-brand-500/10'
-                  : 'border-gray-700 hover:border-gray-500'
+                  ? 'border-mint-400 bg-mint-500/10'
+                  : 'border-[--border] hover:border-gray-500'
               }`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
@@ -608,11 +608,11 @@ export default function UserEditPage() {
                 onClick={(e) => e.stopPropagation()}
                 className="hidden"
               />
-              <svg className="w-10 h-10 mx-auto text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 mx-auto text-[--text-muted] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              <p className="text-sm text-gray-400">Klik atau drag & drop gambar di sini</p>
-              <p className="text-xs text-gray-600 mt-1">JPG, PNG, GIF, WebP. Maksimal {remaining} foto lagi.</p>
+              <p className="text-sm text-[--text-muted]">Klik atau drag & drop gambar di sini</p>
+              <p className="text-xs text-[--text-muted] mt-1">JPG, PNG, GIF, WebP. Maksimal {remaining} foto lagi.</p>
             </div>
 
             {/* Preview Area */}
@@ -625,11 +625,11 @@ export default function UserEditPage() {
                       <img
                         src={src}
                         alt={`Preview ${i + 1}`}
-                        className="w-full h-20 object-cover rounded-lg border border-gray-700"
+                        className="w-full h-20 object-cover rounded-lg border border-[--border]"
                       />
                       <button
                         onClick={(e) => { e.stopPropagation(); removePreview(i); }}
-                        className="absolute -top-1.5 -right-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1.5 -right-1.5 bg-[--surface-3] hover:bg-gray-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         &times;
                       </button>
