@@ -79,7 +79,7 @@ export default function UserSidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
+      <nav className="flex-1 overflow-y-auto overscroll-contain py-3 px-2 space-y-4">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
             <AnimatePresence initial={false}>
@@ -202,7 +202,7 @@ export default function UserSidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
             onClick={onMobileClose}
           />
         )}
@@ -222,7 +222,7 @@ export default function UserSidebar({
         initial={false}
         animate={{ x: mobileOpen ? 0 : -260 }}
         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-        className="lg:hidden fixed left-0 top-0 h-full w-60 z-30 bg-[--surface-1] border-r border-[--border] flex flex-col"
+        className="lg:hidden fixed left-0 top-0 h-full w-60 z-50 bg-[--surface-1] border-r border-[--border] flex flex-col"
       >
         {sidebarContent}
       </motion.aside>
