@@ -20,9 +20,16 @@ export interface JWTPayload {
   storeJid?: string;
 }
 
+export interface ChatFile {
+  url: string;
+  type: 'image' | 'video' | 'document';
+  filename: string;
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  files?: ChatFile[];
 }
 
 export type Locale = 'id' | 'en';
