@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-const NAV_GROUPS = [
+const NAV_GROUPS_SMART = [
   {
     label: 'Toko',
     items: [
@@ -30,8 +30,20 @@ const NAV_GROUPS = [
   },
 ];
 
+const NAV_GROUPS_BASIC = [
+  {
+    label: 'Toko',
+    items: [
+      { href: '/user', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
+      { href: '/user/website', label: 'Website', icon: Globe },
+    ],
+  },
+];
+
 interface Props {
   storeName: string;
+  isSmart: boolean;
   onLogout: () => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
@@ -40,9 +52,10 @@ interface Props {
 }
 
 export default function UserSidebar({
-  storeName, onLogout, collapsed, onToggleCollapse, mobileOpen, onMobileClose,
+  storeName, isSmart, onLogout, collapsed, onToggleCollapse, mobileOpen, onMobileClose,
 }: Props) {
   const pathname = usePathname();
+  const NAV_GROUPS = isSmart ? NAV_GROUPS_SMART : NAV_GROUPS_BASIC;
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -147,6 +160,14 @@ export default function UserSidebar({
           </div>
         ))}
       </nav>
+
+      {/* Upgrade prompt for basic plan */}
+      {!isSmart && !collapsed && (
+        <div className="mx-2 mb-2 px-3 py-2.5 rounded-xl bg-gradient-to-br from-violet-500/10 to-mint-500/10 border border-violet-500/20">
+          <p className="text-[10px] font-semibold text-violet-300 uppercase tracking-wider mb-1">Paket SMART</p>
+          <p className="text-xs text-[--text-muted] leading-snug">Buka semua fitur: layanan, ulasan, percakapan & lebih</p>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="px-2 pb-3 border-t border-[--border] pt-3 flex-shrink-0">

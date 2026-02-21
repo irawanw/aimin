@@ -135,15 +135,35 @@ function UserDashboard() {
       fetch('/api/user/token-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) })
         .then((r) => r.json())
         .then((data) => {
-          if (data.success) window.location.href = '/user';
-          else { setError(data.error || 'Login gagal'); setLoading(false); }
+          if (data.success) {
+            // Check onboarding status before redirecting
+            fetch('/api/user/store')
+              .then((r) => r.json())
+              .then((storeData) => {
+                if (!storeData.error && !storeData.store_onboarding_done && storeData.store_name === 'Toko Baru') {
+                  window.location.href = '/user/onboarding';
+                } else {
+                  window.location.href = '/user';
+                }
+              })
+              .catch(() => { window.location.href = '/user'; });
+          } else {
+            setError(data.error || 'Login gagal');
+            setLoading(false);
+          }
         })
         .catch(() => { setError('Gagal menghubungi server'); setLoading(false); });
       return;
     }
     fetch('/api/user/store')
       .then((r) => r.json())
-      .then((data) => { if (data.error) setError(data.error); else setStore(data); setLoading(false); })
+      .then((data) => {
+        if (data.error) { setError(data.error); setLoading(false); return; }
+        // Only redirect to onboarding if not done AND store has no name yet (truly new user)
+        if (!data.store_onboarding_done && data.store_name === 'Toko Baru') { window.location.href = '/user/onboarding'; return; }
+        setStore(data);
+        setLoading(false);
+      })
       .catch(() => { setError('Gagal memuat data toko'); setLoading(false); });
     fetchImages();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -206,7 +226,8 @@ function UserDashboard() {
   const isBotOn = !!store.store_bot_always_on;
 
   const expiredAt = store.store_expired_at ? new Date(store.store_expired_at) : null;
-  const isExpiringSoon = expiredAt && expiredAt.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
+  const isExpired = expiredAt ? expiredAt < new Date() : false;
+  const isExpiringSoon = !isExpired && expiredAt && expiredAt.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
   const expiredLabel = expiredAt
     ? expiredAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     : null;
@@ -246,8 +267,8 @@ function UserDashboard() {
               </div>
               <p className="text-sm text-[--text-muted] mt-0.5">{store.store_tagline || 'Belum ada tagline'}</p>
               {expiredLabel && (
-                <p className={`text-xs mt-1 font-medium ${isExpiringSoon ? 'text-amber-400' : 'text-[--text-muted]'}`}>
-                  {isExpiringSoon ? '⚠ ' : ''}Aktif hingga {expiredLabel}
+                <p className={`text-xs mt-1 font-medium ${isExpired ? 'text-red-400' : isExpiringSoon ? 'text-amber-400' : 'text-[--text-muted]'}`}>
+                  {isExpired ? '⛔ Expired sejak ' : isExpiringSoon ? '⚠ Aktif hingga ' : 'Aktif hingga '}{expiredLabel}
                 </p>
               )}
               <p className="text-xs text-[--text-muted] mt-1 font-mono">+{whatsappNumber}</p>
@@ -264,10 +285,10 @@ function UserDashboard() {
       <motion.div variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label="Status Toko"
-          value={isActive ? 'Aktif' : 'Nonaktif'}
-          sub={expiredLabel ? `s/d ${expiredLabel}` : undefined}
+          value={isExpired ? 'Expired' : isActive ? 'Aktif' : 'Nonaktif'}
+          sub={expiredLabel ? (isExpired ? `Expired ${expiredLabel}` : `s/d ${expiredLabel}`) : undefined}
           icon={CheckCircle2}
-          accent={isActive ? 'bg-mint-500/15 text-mint-400' : 'bg-red-500/15 text-red-400'}
+          accent={isExpired ? 'bg-red-500/15 text-red-400' : isActive ? 'bg-mint-500/15 text-mint-400' : 'bg-red-500/15 text-red-400'}
         />
         <StatCard
           label="Bot WhatsApp"
@@ -292,22 +313,27 @@ function UserDashboard() {
       </motion.div>
 
       {/* Quick actions + store info */}
-      <div className="grid lg:grid-cols-5 gap-4">
+      {(() => {
+        const isSmart = ((store as any).plan_max_images ?? 5) >= 20;
+        return (
+        <div className="grid lg:grid-cols-5 gap-4">
 
-        {/* Quick actions */}
-        <motion.div variants={fadeUp} className="lg:col-span-2 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] px-0.5">Aksi Cepat</p>
-          <div className="space-y-1.5">
-            <QuickAction href="/user/services" icon={Briefcase} label="Kelola Layanan" desc="Tambah atau edit layanan" color="bg-brand-500/15 text-brand-400" />
-            <QuickAction href="/user/website" icon={Globe} label="Atur Website" desc="Template & warna" color="bg-cyan-500/15 text-cyan-400" />
-            <QuickAction href="/user/conversations" icon={BarChart2} label="Percakapan" desc="Statistik chat bot" color="bg-mint-500/15 text-mint-400" />
-            <QuickAction href="/user/reviews" icon={TrendingUp} label="Ulasan" desc="Rating & testimoni" color="bg-amber-500/15 text-amber-400" />
-            <QuickAction href="/user/widget" icon={MessageSquare} label="Chat Widget" desc="Pasang di website" color="bg-violet-500/15 text-violet-400" />
-          </div>
-        </motion.div>
+          {/* Quick actions — smart plan only */}
+          {isSmart && (
+            <motion.div variants={fadeUp} className="lg:col-span-2 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] px-0.5">Aksi Cepat</p>
+              <div className="space-y-1.5">
+                <QuickAction href="/user/services" icon={Briefcase} label="Kelola Layanan" desc="Tambah atau edit layanan" color="bg-brand-500/15 text-brand-400" />
+                <QuickAction href="/user/website" icon={Globe} label="Atur Website" desc="Template & warna" color="bg-cyan-500/15 text-cyan-400" />
+                <QuickAction href="/user/conversations" icon={BarChart2} label="Percakapan" desc="Statistik chat bot" color="bg-mint-500/15 text-mint-400" />
+                <QuickAction href="/user/reviews" icon={TrendingUp} label="Ulasan" desc="Rating & testimoni" color="bg-amber-500/15 text-amber-400" />
+                <QuickAction href="/user/widget" icon={MessageSquare} label="Chat Widget" desc="Pasang di website" color="bg-violet-500/15 text-violet-400" />
+              </div>
+            </motion.div>
+          )}
 
-        {/* Store info */}
-        <motion.div variants={fadeUp} className="lg:col-span-3 bg-[--surface-2] border border-[--border] rounded-xl p-4">
+          {/* Store info */}
+          <motion.div variants={fadeUp} className={`${isSmart ? 'lg:col-span-3' : 'lg:col-span-5'} bg-[--surface-2] border border-[--border] rounded-xl p-4`}>
           <p className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] mb-3">Informasi Toko</p>
           <table className="w-full text-sm table-fixed">
             <tbody>
@@ -320,7 +346,9 @@ function UserDashboard() {
             </tbody>
           </table>
         </motion.div>
-      </div>
+        </div>
+        );
+      })()}
 
       {/* Knowledge Base */}
       {store.store_knowledge_base && (

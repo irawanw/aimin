@@ -33,8 +33,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', 'sans-serif'],
-        mono: ['DM Mono', 'monospace'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+        display: ['Syne', 'system-ui', 'sans-serif'],
       },
     },
   },

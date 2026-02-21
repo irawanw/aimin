@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import UpgradeGate from '@/components/user/UpgradeGate';
 
 export default function WidgetPage() {
+  return <UpgradeGate><WidgetContent /></UpgradeGate>;
+}
+
+function WidgetContent() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,7 +99,12 @@ export default function WidgetPage() {
     }
   }
 
-  if (loading) return <div className="text-[--text-muted]">Loading...</div>;
+  if (loading) return (
+    <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+      <div className="bg-[--surface-2] border border-[--border] rounded-2xl p-6 h-32" />
+      <div className="bg-[--surface-2] border border-[--border] rounded-2xl p-6 h-48" />
+    </div>
+  );
 
   const embedCode = `<script src="https://aiminassist.com/widget.js" data-store="${subdomain}"></script>`;
 
@@ -114,13 +124,8 @@ export default function WidgetPage() {
       )}
 
       {/* Enable/Disable Toggle */}
-      <div className="glass-dark rounded-2xl p-6">
-        <h3 className="text-white font-semibold mb-5 flex items-center gap-2">
-          <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          Chat Widget
-        </h3>
+      <div className="page-card p-6">
+        <p className="section-label mb-5">Chat Widget</p>
 
         <div className="flex items-center justify-between">
           <div>
@@ -142,19 +147,14 @@ export default function WidgetPage() {
       </div>
 
       {/* Allowed Domains */}
-      <div className="glass-dark rounded-2xl p-6">
-        <h3 className="text-white font-semibold mb-1 flex items-center gap-2">
-          <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          Domain yang Diizinkan
-        </h3>
-        <p className="text-[--text-muted] text-xs mb-4">Widget hanya akan muncul di domain-domain ini</p>
+      <div className="page-card p-6">
+        <p className="section-label mb-0.5">Domain yang Diizinkan</p>
+        <p className="text-xs text-[--text-muted] mb-4 mt-1">Widget hanya akan muncul di domain-domain ini</p>
 
         <div className="flex gap-2 mb-3">
           <input
             type="text"
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+            className="form-input flex-1"
             placeholder="https://example.com"
             value={newDomain}
             onChange={(e) => setNewDomain(e.target.value)}
@@ -194,14 +194,9 @@ export default function WidgetPage() {
 
       {/* Embed Code */}
       {subdomain && (
-        <div className="glass-dark rounded-2xl p-6">
-          <h3 className="text-white font-semibold mb-1 flex items-center gap-2">
-            <svg className="w-5 h-5 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-            Kode Embed
-          </h3>
-          <p className="text-[--text-muted] text-xs mb-4">Tempel kode ini di website eksternal Anda sebelum tag &lt;/body&gt;</p>
+        <div className="page-card p-6">
+          <p className="section-label mb-0.5">Kode Embed</p>
+          <p className="text-xs text-[--text-muted] mb-4 mt-1">Tempel kode ini di website eksternal Anda sebelum tag &lt;/body&gt;</p>
 
           <div className="relative">
             <pre className="px-4 py-3 rounded-xl bg-[--surface-1] border border-[--border] text-xs text-green-400 font-mono overflow-x-auto whitespace-pre-wrap break-all">

@@ -56,19 +56,24 @@ export default function StoreConfigPage() {
         <div className="overflow-x-auto glass-dark rounded-2xl">
           <table className="w-full text-sm">
             <thead><tr className="text-gray-500 border-b border-gray-800">
-              <th className="text-left p-3">JID</th><th className="text-left p-3">Nama</th><th className="text-left p-3">Admin</th>
-              <th className="text-left p-3">Tagline</th><th className="p-3">Aksi</th>
+              <th className="hidden sm:table-cell text-left p-3">JID</th>
+              <th className="text-left p-3">Nama</th>
+              <th className="hidden md:table-cell text-left p-3">Admin</th>
+              <th className="hidden lg:table-cell text-left p-3">Tagline</th>
+              <th className="p-3 text-center">Aksi</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-800">
               {data.map((s: any) => (
                 <tr key={s.store_whatsapp_jid}>
-                  <td className="p-3 text-gray-400 font-mono text-xs">{s.store_whatsapp_jid}</td>
+                  <td className="hidden sm:table-cell p-3 text-gray-400 font-mono text-xs">{s.store_whatsapp_jid}</td>
                   <td className="p-3 text-gray-200">{s.store_name}</td>
-                  <td className="p-3 text-gray-400">{s.store_admin}</td>
-                  <td className="p-3 text-gray-400 truncate max-w-[200px]">{s.store_tagline}</td>
-                  <td className="p-3 text-center space-x-2">
-                    <button onClick={() => openEdit(s)} className="text-xs text-brand-400 hover:underline">Edit</button>
-                    <button onClick={() => handleDelete(s.store_whatsapp_jid)} className="text-xs text-red-400 hover:underline">Hapus</button>
+                  <td className="hidden md:table-cell p-3 text-gray-400">{s.store_admin}</td>
+                  <td className="hidden lg:table-cell p-3 text-gray-400 truncate max-w-[200px]">{s.store_tagline}</td>
+                  <td className="p-3">
+                    <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
+                      <button onClick={() => openEdit(s)} className="text-xs text-brand-400 hover:underline">Edit</button>
+                      <button onClick={() => handleDelete(s.store_whatsapp_jid)} className="text-xs text-red-400 hover:underline">Hapus</button>
+                    </div>
                   </td>
                 </tr>
               ))}

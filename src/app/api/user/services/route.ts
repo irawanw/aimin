@@ -14,6 +14,7 @@ interface StoreInfo {
   store_id: number;
   store_subdomain: string;
   store_folder: string;
+  max_products: number;
 }
 
 async function getStoreInfo(): Promise<StoreInfo | null> {
@@ -25,11 +26,15 @@ async function getStoreInfo(): Promise<StoreInfo | null> {
     const jid = payload.jid;
     if (!jid) return null;
     const [rows] = await pool.execute(
-      'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
+      `SELECT p.store_id, p.store_subdomain, p.store_folder,
+              COALESCE(pk.pkt_product_num, 5) AS max_products
+       FROM pelanggan p
+       LEFT JOIN paket pk ON p.store_paket = pk.pkt_id
+       WHERE p.store_whatsapp_jid = ?`,
       [jid]
     );
     const data = rows as any[];
-    return data.length > 0 ? { store_id: data[0].store_id, store_subdomain: data[0].store_subdomain, store_folder: data[0].store_folder } : null;
+    return data.length > 0 ? { store_id: data[0].store_id, store_subdomain: data[0].store_subdomain, store_folder: data[0].store_folder, max_products: data[0].max_products ?? 5 } : null;
   } catch {
     return null;
   }
@@ -114,6 +119,15 @@ export async function POST(req: Request) {
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    }
+
+    // Enforce plan product limit
+    const [[{ svc_count }]] = await pool.execute(
+      'SELECT COUNT(*) as svc_count FROM services WHERE client_id = ?',
+      [store.store_id]
+    ) as any;
+    if (svc_count >= store.max_products) {
+      return NextResponse.json({ error: `Batas maksimal ${store.max_products} layanan untuk paket Anda` }, { status: 400 });
     }
 
     const [result] = await pool.execute(

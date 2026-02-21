@@ -35,34 +35,41 @@ export default function Admin191Layout({ children }: { children: React.ReactNode
 
   if (isLoginPage) return <>{children}</>;
 
-  if (loading) return <div className="min-h-screen bg-gray-950 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full" /></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[--surface-0] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-mint-400 to-mint-600 animate-pulse" />
+        <div className="w-1.5 h-1.5 rounded-full bg-mint-500 animate-bounce" />
+      </div>
+    </div>
+  );
   if (!admin) return null;
 
   return (
-    <div className="min-h-screen bg-gray-950 flex text-gray-100">
+    <div className="min-h-screen bg-[--surface-0] flex text-[--text-primary]">
       <AdminSidebar
         adminName={admin.adm_name}
         onLogout={handleLogout}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
-      <div className="lg:ml-64 flex-1">
-        <header className="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4 flex items-center justify-between">
+      <div className="lg:ml-64 flex-1 min-w-0">
+        <header className="bg-[--surface-1] border-b border-[--border] px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden text-gray-400 hover:text-gray-200 p-1"
+              className="lg:hidden text-[--text-muted] hover:text-[--text-secondary] p-1"
               aria-label="Open menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-gray-100">Admin Panel</h1>
+            <h1 className="text-base font-semibold text-[--text-primary]">Admin Panel</h1>
           </div>
-          <span className="text-xs bg-red-500/20 text-red-400 px-2.5 py-1 rounded-full font-mono font-semibold">ADMIN</span>
+          <span className="text-xs bg-red-500/15 text-red-400 px-2.5 py-1 rounded-full font-mono font-semibold tracking-wide">ADMIN</span>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );

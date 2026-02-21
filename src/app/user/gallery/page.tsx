@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import UpgradeGate from '@/components/user/UpgradeGate';
 
 interface GalleryItem {
   id: number;
@@ -14,6 +15,10 @@ interface GalleryItem {
 const emptyForm = { title: '', description: '', image_url: '' };
 
 export default function GalleryPage() {
+  return <UpgradeGate><GalleryContent /></UpgradeGate>;
+}
+
+function GalleryContent() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -248,12 +253,12 @@ export default function GalleryPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-dark rounded-2xl p-6 w-full max-w-md"
             >
-              <h2 className="text-xl font-bold text-[--text-primary] mb-4">
+              <h2 className="text-base font-semibold text-[--text-primary] mb-5">
                 {editingItem ? 'Edit Item' : 'Tambah Item'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Gambar</label>
+                  <label className="form-label">Gambar</label>
                   {form.image_url ? (
                     <div className="relative">
                       <img
@@ -271,33 +276,34 @@ export default function GalleryPage() {
                       </button>
                     </div>
                   ) : (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-mint-400 file:bg-mint-900/20"
-                    />
+                    <label className="flex flex-col items-center gap-2 w-full px-4 py-6 bg-[--surface-3] border border-dashed border-[--border] rounded-xl cursor-pointer hover:border-mint-500/50 transition-colors">
+                      <svg className="w-8 h-8 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs text-[--text-muted]">Klik untuk pilih gambar</span>
+                      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                    </label>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Judul *</label>
+                  <label className="form-label">Judul <span className="text-red-400">*</span></label>
                   <input
                     type="text"
                     required
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     placeholder="Nama item"
-                    className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white placeholder-[--text-muted] focus:border-mint-500/60 focus:ring-2 focus:ring-mint-500/20 outline-none transition-all"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[--text-secondary] mb-1">Deskripsi</label>
+                  <label className="form-label">Deskripsi</label>
                   <textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Deskripsi singkat"
                     rows={3}
-                    className="w-full px-4 py-2 bg-[--surface-3] border border-[--border] rounded-lg text-white placeholder-[--text-muted] focus:border-mint-500/60 focus:ring-2 focus:ring-mint-500/20 outline-none transition-all resize-none"
+                    className="form-textarea"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
@@ -338,7 +344,7 @@ export default function GalleryPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-dark rounded-2xl p-6 w-full max-w-sm"
             >
-              <h2 className="text-lg font-bold text-[--text-primary] mb-2">Hapus Item?</h2>
+              <h2 className="text-base font-semibold text-[--text-primary] mb-2">Hapus Item?</h2>
               <p className="text-[--text-muted] mb-6">Apakah Anda yakin ingin menghapus item ini?</p>
               <div className="flex gap-3">
                 <button

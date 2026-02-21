@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import UpgradeGate from '@/components/user/UpgradeGate';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Service {
@@ -51,6 +52,10 @@ function compressImage(file: File, maxWidth = 800, quality = 0.8): Promise<strin
 }
 
 export default function ServicesPage() {
+  return <UpgradeGate><ServicesContent /></UpgradeGate>;
+}
+
+function ServicesContent() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -535,10 +540,10 @@ export default function ServicesPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Judul Layanan <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Judul Layanan <span className="text-red-400">*</span></label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                    className="form-input"
                     placeholder="Contoh: Cuci Sepatu Premium"
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -548,10 +553,10 @@ export default function ServicesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Deskripsi</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Deskripsi</label>
                   <textarea
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y text-sm"
+                    className="form-textarea"
                     placeholder="Deskripsi singkat layanan Anda"
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -559,10 +564,10 @@ export default function ServicesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Harga</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Harga</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                    className="form-input"
                     placeholder="Rp 100.000"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -571,7 +576,7 @@ export default function ServicesPage() {
 
                 {/* Image Section */}
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Gambar Layanan</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Gambar Layanan</label>
 
                   {hasImage ? (
                     /* Selected image preview */
@@ -602,7 +607,7 @@ export default function ServicesPage() {
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          className="flex-1 px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                          className="form-input flex-1"
                           placeholder="Cari gambar... (contoh: salon, food)"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}

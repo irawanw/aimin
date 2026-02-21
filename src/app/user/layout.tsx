@@ -13,6 +13,7 @@ interface PelangganUser {
   store_name: string;
   store_subdomain?: string;
   store_status?: string;
+  plan_is_smart?: boolean;
 }
 
 function UserLayoutInner({ children }: { children: React.ReactNode }) {
@@ -41,7 +42,12 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
       .then((r) => r.json())
       .then((data) => {
         if (data && !data.error) {
-          setUser((u) => u ? { ...u, store_subdomain: data.store_subdomain, store_status: data.store_status } : u);
+          setUser((u) => u ? {
+            ...u,
+            store_subdomain: data.store_subdomain,
+            store_status: data.store_status,
+            plan_is_smart: (data.plan_max_images ?? 5) >= 20,
+          } : u);
         }
       })
       .catch(() => {});
@@ -76,6 +82,7 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[--surface-0] text-[--text-primary]">
       <UserSidebar
         storeName={user.store_name}
+        isSmart={user.plan_is_smart ?? false}
         onLogout={handleLogout}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
@@ -118,7 +125,7 @@ function UserLayoutInner({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
-        <UserBottomNav />
+        <UserBottomNav isSmart={user.plan_is_smart ?? false} />
       </div>
     </div>
   );

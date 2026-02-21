@@ -45,16 +45,40 @@ export async function GET() {
   }
 
   try {
+    // Ensure optional columns exist
+    try {
+      await pool.execute(
+        `ALTER TABLE pelanggan ADD COLUMN IF NOT EXISTS store_onboarding_done TINYINT(1) DEFAULT 0`
+      );
+    } catch {}
+    try {
+      await pool.execute(
+        `ALTER TABLE pelanggan ADD COLUMN IF NOT EXISTS store_language VARCHAR(10) DEFAULT 'id'`
+      );
+    } catch {}
+    try {
+      await pool.execute(
+        `ALTER TABLE paket ADD COLUMN IF NOT EXISTS pkt_product_num INT DEFAULT 5`
+      );
+    } catch {}
+
     const [rows] = await pool.execute(
-      `SELECT store_whatsapp_jid, store_name, store_admin, store_address,
-              store_tagline, store_feature, store_knowledge_base, store_images,
-              store_status, store_type, store_fulfillment, store_folder, store_paket, store_expired_at,
-              store_products, store_admin_number, store_bot_always_on, store_email, store_whatsapp_bot, store_updated_at,
-              store_id, store_subdomain, store_design_type, store_site_type,
-              store_theme_primary, store_theme_background, store_hero_title, store_hero_subtitle,
-              store_hero_image, store_hero_image_keyword, store_about_us,
-              store_latitude, store_longitude, store_website_others
-       FROM pelanggan WHERE store_whatsapp_jid = ?`,
+      `SELECT p.store_whatsapp_jid, p.store_name, p.store_admin, p.store_address,
+              p.store_tagline, p.store_feature, p.store_knowledge_base, p.store_images,
+              p.store_status, p.store_type, p.store_fulfillment, p.store_folder, p.store_paket, p.store_expired_at,
+              p.store_products, p.store_admin_number, p.store_bot_always_on, p.store_email, p.store_whatsapp_bot, p.store_updated_at,
+              p.store_id, p.store_subdomain, p.store_design_type, p.store_site_type,
+              p.store_theme_primary, p.store_theme_background, p.store_hero_title, p.store_hero_subtitle,
+              p.store_hero_image, p.store_hero_image_keyword, p.store_about_us,
+              p.store_latitude, p.store_longitude, p.store_website_others,
+              IFNULL(p.store_onboarding_done, 0) AS store_onboarding_done,
+              IFNULL(p.store_language, 'id') AS store_language,
+              COALESCE(pk.pkt_pict_num, 5) AS plan_max_images,
+              COALESCE(pk.pkt_kb_length, 500) AS plan_max_kb,
+              COALESCE(pk.pkt_product_num, 5) AS plan_max_products
+       FROM pelanggan p
+       LEFT JOIN paket pk ON p.store_paket = pk.pkt_id
+       WHERE p.store_whatsapp_jid = ?`,
       [jid]
     );
 
@@ -87,6 +111,7 @@ export async function PUT(req: Request) {
       'store_theme_primary', 'store_theme_background', 'store_hero_title', 'store_hero_subtitle',
       'store_hero_image_keyword', 'store_hero_image', 'store_about_us',
       'store_latitude', 'store_longitude', 'store_website_others',
+      'store_language',
     ];
 
     const updates: string[] = [];
@@ -188,12 +213,31 @@ export async function PUT(req: Request) {
 
     // Invalidate client-side cache so changes appear instantly
     const [storeRows] = await pool.execute(
-      'SELECT store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ?',
+      'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
       [jid]
     );
     const store = (storeRows as any[])[0];
     if (store) {
       revalidateClient({ subdomain: store.store_subdomain, storeId: store.store_id });
+    }
+
+    // Fire-and-forget: rebuild RAG index if knowledge base was updated
+    if ('store_knowledge_base' in body && store?.store_folder) {
+      const ragUrl = process.env.RAG_SERVICE_URL || 'http://127.0.0.1:8002';
+      const kbText = body.store_knowledge_base || '';
+      if (kbText.trim()) {
+        fetch(`${ragUrl}/index`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder: store.store_folder, text: kbText }),
+        }).catch(() => {}); // intentionally fire-and-forget
+      } else {
+        fetch(`${ragUrl}/index`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folder: store.store_folder }),
+        }).catch(() => {}); // intentionally fire-and-forget
+      }
     }
 
     return NextResponse.json({ success: true });

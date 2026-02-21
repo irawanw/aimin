@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -20,12 +19,19 @@ export function FeatureCard({ icon: Icon, title, description, delay = 0 }: Featu
       transition={{ duration: 0.5, delay }}
       className="group"
     >
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-mint-200 transition-all duration-300 hover:-translate-y-1">
-        <div className="w-14 h-14 bg-gradient-to-br from-mint-500 to-mint-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-mint-500/25">
-          <Icon className="w-7 h-7 text-white" />
+      <div className="relative h-full bg-[#0f1012] rounded-2xl p-8 border border-white/[0.06] hover:border-[#2EE6C9]/30 transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+        {/* Hover glow */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(46,230,201,0.07) 0%, transparent 70%)' }} />
+
+        <div className="relative">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
+            style={{ background: 'linear-gradient(135deg, rgba(46,230,201,0.15) 0%, rgba(46,230,201,0.05) 100%)', border: '1px solid rgba(46,230,201,0.2)' }}>
+            <Icon className="w-6 h-6 text-[#2EE6C9]" />
+          </div>
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3">{title}</h3>
+          <p className="text-white/50 text-sm leading-relaxed">{description}</p>
         </div>
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{title}</h3>
-        <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{description}</p>
       </div>
     </motion.div>
   );

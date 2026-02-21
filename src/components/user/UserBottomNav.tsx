@@ -9,23 +9,31 @@ import {
   PenLine, Images, Star, MessageSquare,
 } from 'lucide-react';
 
-const MAIN_NAV = [
+const MAIN_NAV_SMART = [
   { href: '/user', label: 'Home', icon: LayoutDashboard },
   { href: '/user/services', label: 'Layanan', icon: Briefcase },
   { href: '/user/conversations', label: 'Chat', icon: BarChart2 },
   { href: '/user/website', label: 'Website', icon: Globe },
 ];
 
-const MORE_NAV = [
+const MAIN_NAV_BASIC = [
+  { href: '/user', label: 'Home', icon: LayoutDashboard },
+  { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
+  { href: '/user/website', label: 'Website', icon: Globe },
+];
+
+const MORE_NAV_SMART = [
   { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
   { href: '/user/gallery', label: 'Gallery', icon: Images },
   { href: '/user/reviews', label: 'Ulasan', icon: Star },
   { href: '/user/widget', label: 'Chat Widget', icon: MessageSquare },
 ];
 
-export default function UserBottomNav() {
+export default function UserBottomNav({ isSmart }: { isSmart: boolean }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const MAIN_NAV = isSmart ? MAIN_NAV_SMART : MAIN_NAV_BASIC;
+  const MORE_NAV = isSmart ? MORE_NAV_SMART : [];
 
   return (
     <>
@@ -96,8 +104,8 @@ export default function UserBottomNav() {
             );
           })}
 
-          {/* More button */}
-          <button
+          {/* More button — only for smart plan */}
+          {isSmart && <button
             onClick={() => setMoreOpen(!moreOpen)}
             className="flex-1 flex flex-col items-center justify-center gap-1 h-full group"
           >
@@ -107,7 +115,7 @@ export default function UserBottomNav() {
               <MoreHorizontal style={{ width: '18px', height: '18px' }} className={`transition-colors ${moreOpen ? 'text-mint-400' : 'text-[--text-muted]'}`} />
             </div>
             <span className={`text-[10px] font-medium transition-colors ${moreOpen ? 'text-mint-400' : 'text-[--text-muted]'}`}>Lainnya</span>
-          </button>
+          </button>}
         </div>
       </nav>
     </>

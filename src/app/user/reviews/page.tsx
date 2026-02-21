@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import UpgradeGate from '@/components/user/UpgradeGate';
 
 interface Review {
   id: number;
@@ -22,6 +23,10 @@ type ReviewForm = {
 const emptyForm: ReviewForm = { reviewer_name: '', reviewer_photo_keyword: '', rating: 5, review_text: '' };
 
 export default function ReviewsPage() {
+  return <UpgradeGate><ReviewsContent /></UpgradeGate>;
+}
+
+function ReviewsContent() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -416,10 +421,10 @@ export default function ReviewsPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Nama Reviewer <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Nama Reviewer <span className="text-red-400">*</span></label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                    className="form-input"
                     placeholder="Contoh: Budi Santoso"
                     value={form.reviewer_name}
                     onChange={(e) => setForm({ ...form, reviewer_name: e.target.value })}
@@ -429,10 +434,10 @@ export default function ReviewsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Keyword Foto (opsional)</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Keyword Foto (opsional)</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                    className="form-input"
                     placeholder="man1, woman1, dll"
                     value={form.reviewer_photo_keyword}
                     onChange={(e) => setForm({ ...form, reviewer_photo_keyword: e.target.value })}
@@ -440,9 +445,9 @@ export default function ReviewsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Rating</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Rating</label>
                   <select
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors text-sm"
+                    className="form-select"
                     value={form.rating}
                     onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })}
                   >
@@ -453,10 +458,10 @@ export default function ReviewsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-[--text-muted] mb-1.5">Ulasan <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Ulasan <span className="text-red-400">*</span></label>
                   <textarea
                     rows={4}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[--surface-3] border border-[--border] text-[--text-primary] focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 outline-none transition-colors resize-y text-sm"
+                    className="form-textarea"
                     placeholder="Tulis ulasan pengalaman pelanggan..."
                     value={form.review_text}
                     onChange={(e) => setForm({ ...form, review_text: e.target.value })}

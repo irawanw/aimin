@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import UpgradeGate from '@/components/user/UpgradeGate';
 
 interface StatsData {
   period: string;
@@ -74,15 +75,19 @@ function formatCurrency(val: string | number) {
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   return (
-    <div className="glass-dark rounded-2xl p-5">
-      <p className="text-[--text-muted] text-sm">{label}</p>
-      <p className={`text-3xl font-bold mt-1 ${color || 'text-[--text-primary]'}`}>{value}</p>
-      {sub && <p className="text-[--text-muted] text-xs mt-1">{sub}</p>}
+    <div className="bg-[--surface-2] border border-[--border] rounded-xl p-4">
+      <p className="text-xs font-medium text-[--text-muted] uppercase tracking-wide">{label}</p>
+      <p className={`text-2xl font-semibold font-mono leading-tight mt-1.5 ${color || 'text-[--text-primary]'}`}>{value}</p>
+      {sub && <p className="text-xs text-[--text-muted] mt-1">{sub}</p>}
     </div>
   );
 }
 
 export default function ConversationsPage() {
+  return <UpgradeGate><ConversationsContent /></UpgradeGate>;
+}
+
+function ConversationsContent() {
   const [period, setPeriod] = useState('daily');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -155,8 +160,8 @@ export default function ConversationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[--text-primary]">Statistik Percakapan</h2>
-          <p className="text-[--text-muted] text-sm mt-1">Data percakapan bot WhatsApp</p>
+          <h2 className="text-xl font-semibold text-[--text-primary]">Statistik Percakapan</h2>
+          <p className="text-xs text-[--text-muted] mt-1">Data percakapan bot WhatsApp</p>
         </div>
 
         {/* Filters */}
@@ -175,28 +180,28 @@ export default function ConversationsPage() {
 
       {/* Date range */}
       <div className="flex flex-wrap gap-2 items-center">
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-[--text-muted] whitespace-nowrap">Dari</label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[--text-muted] whitespace-nowrap">Dari</label>
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 w-36"
+            className="bg-[--surface-3] border border-[--border] rounded-xl px-3 py-2 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 transition-all"
           />
         </div>
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-[--text-muted] whitespace-nowrap">Sampai</label>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-[--text-muted] whitespace-nowrap">Sampai</label>
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 w-36"
+            className="bg-[--surface-3] border border-[--border] rounded-xl px-3 py-2 text-xs text-[--text-primary] focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20 transition-all"
           />
         </div>
         {(from || to) && (
           <button
             onClick={() => { setFrom(''); setTo(''); }}
-            className="text-xs text-[--text-muted] hover:text-[--text-secondary] underline"
+            className="text-xs text-[--text-muted] hover:text-[--text-secondary] px-2.5 py-1 rounded-lg bg-[--surface-3] border border-[--border] transition-colors"
           >
             Reset
           </button>
@@ -221,10 +226,10 @@ export default function ConversationsPage() {
 
       {/* Chart */}
       {stats && stats.by_period.length > 0 && (
-        <div className="glass-dark rounded-2xl p-5">
-          <h3 className="text-white font-semibold mb-4">
+        <div className="page-card p-5">
+          <p className="section-label mb-4">
             Percakapan per {PERIODS.find((p) => p.value === period)?.label}
-          </h3>
+          </p>
           <div className="overflow-x-auto">
             <div className="flex items-end gap-1 h-40 min-w-max">
               {stats.by_period.slice().reverse().map((row) => {
@@ -260,14 +265,14 @@ export default function ConversationsPage() {
       )}
 
       {/* Sessions table */}
-      <div className="glass-dark rounded-2xl p-5">
+      <div className="page-card p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <h3 className="text-white font-semibold">Riwayat Percakapan</h3>
+          <p className="section-label">Riwayat Percakapan</p>
           <div className="flex gap-2">
             <select
               value={bookingFilter}
               onChange={(e) => setBookingFilter(e.target.value)}
-              className="bg-[--surface-3] border border-[--border] rounded-lg px-2 py-1.5 text-xs text-[--text-primary] focus:outline-none"
+              className="form-select !text-xs !py-1.5 !w-auto"
             >
               <option value="">Semua</option>
               <option value="1">Booking Berhasil</option>

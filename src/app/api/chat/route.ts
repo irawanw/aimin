@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const CHAT_API_BASE = process.env.CHAT_API_BASE || 'http://192.168.18.36:11481';
+const CHAT_API_BASE = process.env.CHAT_API_BASE || 'http://192.168.18.36:11386';
 
 export async function POST(req: Request) {
   try {

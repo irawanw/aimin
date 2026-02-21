@@ -4,6 +4,11 @@ import jwt from 'jsonwebtoken';
 import pool from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import os from 'os';
+
+const execFileAsync = promisify(execFile);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const COOKIE_NAME = 'pelanggan_token';
@@ -103,6 +108,24 @@ async function updateStoreFiles(jid: string, files: FileEntry[]) {
   );
 }
 
+/** Transcode video to H.264 + AAC MP4 with faststart for WhatsApp compatibility.
+ *  Returns path to the transcoded file (caller must clean up inputPath). */
+async function transcodeVideo(inputPath: string, baseName: string): Promise<string> {
+  const outputPath = path.join(os.tmpdir(), `${baseName}_tc.mp4`);
+  await execFileAsync('ffmpeg', [
+    '-i', inputPath,
+    '-c:v', 'libx264',
+    '-preset', 'fast',
+    '-crf', '28',
+    '-c:a', 'aac',
+    '-b:a', '128k',
+    '-movflags', '+faststart',
+    '-y',
+    outputPath,
+  ]);
+  return outputPath;
+}
+
 // ─── GET ─────────────────────────────────────────────────────────────────────
 
 export async function GET() {
@@ -192,12 +215,32 @@ export async function POST(req: Request) {
       const subDir = path.join(uploadsDir, folderName, cfg.dir);
       fs.mkdirSync(subDir, { recursive: true });
 
-      const ext = file.name.split('.').pop()?.toLowerCase() || cfg.exts[0];
-      const filename = `${Date.now()}.${ext}`;
-      const filepath = path.join(subDir, filename);
-
       const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(filepath, buffer);
+      const baseName = String(Date.now());
+
+      let filename: string;
+      let filepath: string;
+
+      if (fileType === 'video') {
+        // Write original to temp, transcode to H.264+AAC MP4 for WhatsApp compatibility
+        const origExt = file.name.split('.').pop()?.toLowerCase() || 'mp4';
+        const tmpInput = path.join(os.tmpdir(), `${baseName}_orig.${origExt}`);
+        fs.writeFileSync(tmpInput, buffer);
+        try {
+          const transcoded = await transcodeVideo(tmpInput, baseName);
+          filename = `${baseName}.mp4`;
+          filepath = path.join(subDir, filename);
+          fs.copyFileSync(transcoded, filepath);
+          fs.unlinkSync(transcoded);
+        } finally {
+          if (fs.existsSync(tmpInput)) fs.unlinkSync(tmpInput);
+        }
+      } else {
+        const ext = file.name.split('.').pop()?.toLowerCase() || cfg.exts[0];
+        filename = `${baseName}.${ext}`;
+        filepath = path.join(subDir, filename);
+        fs.writeFileSync(filepath, buffer);
+      }
 
       const newEntry: FileEntry = { filename, type: fileType, product: tag || null };
       await updateStoreFiles(jid, [...currentFiles, newEntry]);

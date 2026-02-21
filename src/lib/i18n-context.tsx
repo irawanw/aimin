@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import type { Locale } from '@/types';
 import type { Dictionary } from '@/i18n';
 import idDict from '@/i18n/id.json';
@@ -21,12 +21,23 @@ const I18nContext = createContext<I18nContextType>({
 });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  // Default to Indonesian; restore saved preference after mount
   const [locale, setLocaleState] = useState<Locale>('id');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('aimin_lang') as Locale | null;
+    if (saved === 'en' || saved === 'id') {
+      setLocaleState(saved);
+    }
+  }, []);
+
   const t = dicts[locale];
+
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
     if (typeof window !== 'undefined') localStorage.setItem('aimin_lang', l);
   }, []);
+
   return (
     <I18nContext.Provider value={{ locale, t, setLocale }}>
       {children}

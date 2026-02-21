@@ -7,9 +7,10 @@ interface AnimatedProgressProps {
   progress: number; // 0-100
   color?: string;
   height?: string;
+  trackClassName?: string;
 }
 
-export function AnimatedProgress({ progress, color = '#0d9488', height = '8px' }: AnimatedProgressProps) {
+export function AnimatedProgress({ progress, color = '#0d9488', height = '8px', trackClassName }: AnimatedProgressProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -31,7 +32,7 @@ export function AnimatedProgress({ progress, color = '#0d9488', height = '8px' }
   }, []);
 
   return (
-    <div ref={ref} className="w-full bg-gray-200 rounded-full overflow-hidden" style={{ height }}>
+    <div ref={ref} className={`w-full rounded-full overflow-hidden ${trackClassName ?? 'bg-gray-200'}`} style={{ height }}>
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: isVisible ? `${progress}%` : 0 }}

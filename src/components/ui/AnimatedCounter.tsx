@@ -9,9 +9,10 @@ interface AnimatedCounterProps {
   suffix?: string;
   prefix?: string;
   delay?: number;
+  className?: string;
 }
 
-export function AnimatedCounter({ end, duration = 2, suffix = '', prefix = '', delay = 0 }: AnimatedCounterProps) {
+export function AnimatedCounter({ end, duration = 2, suffix = '', prefix = '', delay = 0, className }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -66,7 +67,7 @@ export function AnimatedCounter({ end, duration = 2, suffix = '', prefix = '', d
 
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 20 }} animate={isVisible ? { opacity: 1, y: 0 } : {}}>
-      <span className="text-4xl md:text-5xl font-bold text-gray-900">
+      <span className={className ?? 'text-4xl md:text-5xl font-bold text-gray-900'}>
         {prefix}
         {count.toLocaleString()}
         {suffix}

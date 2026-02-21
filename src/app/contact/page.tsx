@@ -102,7 +102,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 text-sm">Email</h3>
-                      <p className="text-gray-600 text-sm">info@aiminassist.com</p>
+                      <p className="text-gray-600 text-sm">admin@aiminassist.com</p>
                       <p className="text-gray-500 text-xs mt-1">We reply within 24 hours</p>
                     </div>
                   </div>
@@ -112,7 +112,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 text-sm">Phone</h3>
-                      <p className="text-gray-600 text-sm">+62 21 1234 5678</p>
+                      <p className="text-gray-600 text-sm">+62 8996699415</p>
                       <p className="text-gray-500 text-xs mt-1">Mon-Fri, 9AM-6PM WIB</p>
                     </div>
                   </div>
@@ -122,8 +122,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 text-sm">Office</h3>
-                      <p className="text-gray-600 text-sm">Jakarta, Indonesia</p>
-                      <p className="text-gray-500 text-xs mt-1">Jakarta Selatan, DKI Jakarta</p>
+                      <p className="text-gray-600 text-sm">Pekalongan, Indonesia</p>
+                      <p className="text-gray-500 text-xs mt-1">Pekalongan, Jawa Tengah</p>
                     </div>
                   </div>
                 </div>
