@@ -580,8 +580,8 @@ export default function UserEditPage() {
               }}
             />
             <p className="form-hint">Informasi produk, harga, cara order, dll — digunakan AI untuk menjawab pertanyaan pelanggan</p>
-            {/* File Upload for KB */}
-            <div className="mt-3 rounded-xl border border-dashed border-[--border] bg-[--surface-3]/50 p-4 space-y-3">
+            {/* File Upload for KB — only for non-product stores */}
+            {form.store_type !== 'store' && <div className="mt-3 rounded-xl border border-dashed border-[--border] bg-[--surface-3]/50 p-4 space-y-3">
               <p className="text-xs text-[--text-muted]">
                 <span className="font-medium text-[--text-secondary]">Unggah dokumen PDF / DOCX</span>
                 {' '}— teks akan diekstrak otomatis ke Knowledge Base
@@ -657,7 +657,7 @@ export default function UserEditPage() {
                   </button>
                 )}
               </div>
-            </div>
+            </div>}
           </div>
 
           <div className="flex gap-3 pt-2">

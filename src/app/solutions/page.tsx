@@ -84,6 +84,13 @@ const proFeatures = [
   'Upload 20 product images',
   'Free landing page',
   'Advanced analytics',
+];
+
+const enterpriseFeatures = [
+  'Everything in SMART',
+  'Whitelabelling',
+  'Upload XLS product catalogue',
+  'Upload DOCX PDF knowledge base',
   'Promo automation',
   'API ready',
   'Priority AI processing',
@@ -216,7 +223,7 @@ export default function SolutionsPage() {
             </p>
           </FadeIn>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <FadeIn delay={0.1}>
               <div className="bg-white rounded-3xl p-8 shadow-xl h-full flex flex-col hover:shadow-2xl transition-shadow border border-gray-100">
                 <div className="text-xs sm:text-sm font-semibold text-mint-600 uppercase tracking-wide">Lite</div>
@@ -239,7 +246,7 @@ export default function SolutionsPage() {
             <FadeIn delay={0.2}>
               <div className="relative bg-gradient-to-br from-mint-600 to-mint-700 rounded-3xl p-8 shadow-xl h-full flex flex-col text-white ring-4 ring-mint-400/30">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1 rounded-full">Most Popular</div>
-                <div className="text-xs sm:text-sm font-semibold text-mint-200 uppercase tracking-wide">Pro</div>
+                <div className="text-xs sm:text-sm font-semibold text-mint-200 uppercase tracking-wide">SMART</div>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl sm:text-4xl font-extrabold">Rp 199rb</span>
                   <span className="text-mint-200 text-sm">/month</span>
@@ -253,6 +260,25 @@ export default function SolutionsPage() {
                   ))}
                 </ul>
                 <Link href="/register?msg=Kak+aku+mau+cobain+trial+gimana+caranya+ya%3F" className="mt-8 block text-center bg-white text-mint-700 font-bold py-3 px-6 rounded-xl hover:bg-mint-50 transition-colors shadow-lg">Choose Plan</Link>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3}>
+              <div className="bg-white rounded-3xl p-8 shadow-xl h-full flex flex-col hover:shadow-2xl transition-shadow border border-gray-200">
+                <div className="text-xs sm:text-sm font-semibold text-purple-600 uppercase tracking-wide">PRO</div>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">Rp 299rb</span>
+                  <span className="text-gray-500 text-sm">/month</span>
+                </div>
+                <ul className="mt-8 space-y-3 flex-1">
+                  {enterpriseFeatures.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
+                      <CheckCircle className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register?msg=Kak+aku+mau+cobain+trial+gimana+caranya+ya%3F" className="mt-8 block text-center bg-purple-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-purple-700 transition-colors shadow-lg">Choose Plan</Link>
               </div>
             </FadeIn>
           </div>

@@ -14,11 +14,13 @@ function formatMessage(text: string): ReactNode {
   return lines.map((line, i) => (
     <Fragment key={i}>
       {i > 0 && <br />}
-      {line.split(/(\*\*.*?\*\*)/).map((seg, j) =>
-        seg.startsWith('**') && seg.endsWith('**')
-          ? <strong key={j}>{seg.slice(2, -2)}</strong>
-          : seg
-      )}
+      {line.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).map((seg, j) => {
+        if (seg.startsWith('**') && seg.endsWith('**') && seg.length > 4)
+          return <strong key={j}>{seg.slice(2, -2)}</strong>;
+        if (seg.startsWith('*') && seg.endsWith('*') && seg.length > 2)
+          return <strong key={j}>{seg.slice(1, -1)}</strong>;
+        return seg;
+      })}
     </Fragment>
   ));
 }
@@ -92,7 +94,7 @@ function FileAttachment({ file }: { file: ChatFile }) {
 
 
 export default function ChatWidget() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'assistant', content: t.chat.welcome },
@@ -105,6 +107,43 @@ export default function ChatWidget() {
   const isLoadedRef = useRef(false);
   const pairingPollRef = useRef<NodeJS.Timeout | null>(null);
   const pairingDeadlineRef = useRef<number>(0);
+  const langRef = useRef<string>('id');
+  const localeMountedRef = useRef(false);
+
+  // Detect visitor language from IP on mount (only sets initial default)
+  useEffect(() => {
+    fetch('/api/detect-language')
+      .then((r) => r.json())
+      .then((data) => {
+        // Only apply IP detection if the user hasn't manually switched language
+        if (data.lang && !localStorage.getItem('aimin_lang')) {
+          langRef.current = data.lang;
+        }
+      })
+      .catch(() => { /* keep default 'id' */ });
+  }, []);
+
+  // Sync langRef and reinit chat when user switches language via the navbar
+  useEffect(() => {
+    if (!localeMountedRef.current) {
+      localeMountedRef.current = true;
+      langRef.current = locale;
+      return;
+    }
+    // Language was changed manually — update ref and restart chat
+    langRef.current = locale;
+    const newSessionId = crypto.randomUUID();
+    sessionIdRef.current = newSessionId;
+    localStorage.setItem(STORAGE_KEY, newSessionId);
+    localStorage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.removeItem('chat-messages');
+    isLoadedRef.current = true;
+    setMessages([{ role: 'assistant', content: t.chat.welcome }]);
+    setInput('');
+    setLoading(false);
+    if (followupTimerRef.current) { clearTimeout(followupTimerRef.current); followupTimerRef.current = null; }
+    if (pairingPollRef.current) { clearInterval(pairingPollRef.current); pairingPollRef.current = null; }
+  }, [locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load or create session ID
   useEffect(() => {
@@ -278,7 +317,7 @@ export default function ChatWidget() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.content, sessionId: sessionIdRef.current }),
+        body: JSON.stringify({ message: userMsg.content, sessionId: sessionIdRef.current, lang: langRef.current }),
       });
       const data = await res.json();
       const replyText = data.replyText || data.reply || 'No response';

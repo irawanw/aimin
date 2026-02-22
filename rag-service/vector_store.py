@@ -131,3 +131,79 @@ def store_has_index(folder: str) -> bool:
         exact=False,
     )
     return result.count > 0
+
+# ─── Products collection ──────────────────────────────────────────────────────
+
+PRODUCTS_COLLECTION = "aimin_products"
+
+def _ensure_products_collection():
+    existing = [c.name for c in _client.get_collections().collections]
+    if PRODUCTS_COLLECTION not in existing:
+        _client.create_collection(
+            collection_name=PRODUCTS_COLLECTION,
+            vectors_config=VectorParams(size=VECTOR_DIM, distance=Distance.COSINE),
+        )
+        print(f"[RAG] Created Qdrant collection: {PRODUCTS_COLLECTION}")
+
+_ensure_products_collection()
+
+def store_products(folder: str, product_ids: list[int], embeddings: list[list[float]]):
+    """
+    Store product variant vectors. One vector per variant (row).
+    Payload stores only the SQL product ID — full data lives in MySQL.
+    Replaces ALL existing product vectors for this folder.
+    """
+    _client.delete(
+        collection_name=PRODUCTS_COLLECTION,
+        points_selector=Filter(
+            must=[FieldCondition(key="folder", match=MatchValue(value=folder))]
+        ),
+    )
+    if not product_ids:
+        return
+    points = [
+        PointStruct(
+            id=str(uuid.uuid4()),
+            vector=emb,
+            payload={"folder": folder, "product_id": pid},
+        )
+        for pid, emb in zip(product_ids, embeddings)
+    ]
+    _client.upsert(collection_name=PRODUCTS_COLLECTION, points=points)
+    print(f"[RAG] Indexed {len(points)} product variants for folder: {folder}")
+
+def search_products(folder: str, query_vector: list[float], top_k: int = 5) -> list[dict]:
+    """
+    Semantic product search.
+    Returns [{"product_id": int, "score": float}, ...] ordered by relevance.
+    """
+    results = _client.search(
+        collection_name=PRODUCTS_COLLECTION,
+        query_vector=query_vector,
+        query_filter=Filter(
+            must=[FieldCondition(key="folder", match=MatchValue(value=folder))]
+        ),
+        limit=top_k,
+        score_threshold=0.30,
+    )
+    return [{"product_id": hit.payload["product_id"], "score": hit.score} for hit in results]
+
+def delete_products_index(folder: str):
+    """Remove all product vectors for a store."""
+    _client.delete(
+        collection_name=PRODUCTS_COLLECTION,
+        points_selector=Filter(
+            must=[FieldCondition(key="folder", match=MatchValue(value=folder))]
+        ),
+    )
+    print(f"[RAG] Deleted product index for folder: {folder}")
+
+def products_has_index(folder: str) -> bool:
+    result = _client.count(
+        collection_name=PRODUCTS_COLLECTION,
+        count_filter=Filter(
+            must=[FieldCondition(key="folder", match=MatchValue(value=folder))]
+        ),
+        exact=False,
+    )
+    return result.count > 0

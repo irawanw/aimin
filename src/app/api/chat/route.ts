@@ -5,7 +5,7 @@ const CHAT_API_BASE = process.env.CHAT_API_BASE || 'http://192.168.18.36:11386';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { message, sessionId, storeFolder } = body;
+    const { message, sessionId, storeFolder, lang } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message string required' }, { status: 400 });
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const response = await fetch(`${CHAT_API_BASE}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, sessionId: sessionId || '', storeFolder: storeFolder || '' }),
+      body: JSON.stringify({ message, sessionId: sessionId || '', storeFolder: storeFolder || '', lang: lang || 'id' }),
     });
 
     if (!response.ok) {
