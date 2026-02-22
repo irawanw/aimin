@@ -2,19 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, PenLine, Globe, Images, Briefcase,
   Star, MessageSquare, BarChart2, ChevronLeft, LogOut,
-  Sparkles, Package, ChevronDown,
+  Sparkles, Package,
 } from 'lucide-react';
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  children?: NavItem[];
 }
 
 interface NavGroup {
@@ -47,21 +45,23 @@ function buildNavGroups(isSmart: boolean, storeType?: string): NavGroup[] {
     }];
   }
 
-  const websiteChildren: NavItem[] = [
-    { href: '/user/gallery', label: 'Gallery', icon: Images },
-    isProductStore
-      ? { href: '/user/products', label: 'Katalog Produk', icon: Package }
-      : { href: '/user/services', label: 'Layanan', icon: Briefcase },
-    { href: '/user/reviews', label: 'Ulasan', icon: Star },
-  ];
-
   return [
     {
       label: 'Toko',
       items: [
         { href: '/user', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
-        { href: '/user/website', label: 'Website', icon: Globe, children: websiteChildren },
+      ],
+    },
+    {
+      label: 'Website',
+      items: [
+        { href: '/user/website', label: 'Pengaturan', icon: Globe },
+        { href: '/user/gallery', label: 'Gallery', icon: Images },
+        isProductStore
+          ? { href: '/user/products', label: 'Katalog Produk', icon: Package }
+          : { href: '/user/services', label: 'Layanan', icon: Briefcase },
+        { href: '/user/reviews', label: 'Ulasan', icon: Star },
       ],
     },
     {
@@ -74,132 +74,15 @@ function buildNavGroups(isSmart: boolean, storeType?: string): NavGroup[] {
   ];
 }
 
-const WEBSITE_SUB_PATHS = ['/user/gallery', '/user/services', '/user/products', '/user/reviews'];
-
 export default function UserSidebar({
   storeName, isSmart, storeType, onLogout, collapsed, onToggleCollapse, mobileOpen, onMobileClose,
 }: Props) {
   const pathname = usePathname();
   const NAV_GROUPS = buildNavGroups(isSmart, storeType);
 
-  const isOnWebsiteSub = WEBSITE_SUB_PATHS.some(p => pathname.startsWith(p));
-  const [websiteExpanded, setWebsiteExpanded] = useState(isOnWebsiteSub);
-
-  useEffect(() => {
-    if (isOnWebsiteSub) setWebsiteExpanded(true);
-  }, [isOnWebsiteSub]);
-
   function renderNavItem(item: NavItem) {
-    const { href, label, icon: Icon, children } = item;
+    const { href, label, icon: Icon } = item;
     const active = pathname === href;
-    const hasChildren = !!(children && children.length > 0);
-    const isParentActive = hasChildren && children!.some(c => pathname === c.href);
-    const isExpanded = hasChildren && websiteExpanded;
-
-    if (hasChildren) {
-      return (
-        <div key={href}>
-          <button
-            onClick={() => {
-              if (collapsed) {
-                window.location.href = href;
-              } else {
-                setWebsiteExpanded(!websiteExpanded);
-              }
-            }}
-            title={collapsed ? label : undefined}
-            className={`
-              relative w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium
-              transition-all duration-150 group
-              ${isParentActive || active
-                ? 'bg-[--accent-dim] text-mint-400'
-                : 'text-[--text-secondary] hover:bg-[--surface-3] hover:text-[--text-primary]'
-              }
-            `}
-          >
-            <Icon className={`relative w-4 h-4 flex-shrink-0 ${isParentActive || active ? 'text-mint-400' : 'text-[--text-muted] group-hover:text-[--text-secondary]'} transition-colors`} />
-            <AnimatePresence initial={false}>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="relative whitespace-nowrap overflow-hidden flex-1 text-left"
-                >
-                  {label}
-                </motion.span>
-              )}
-            </AnimatePresence>
-            <AnimatePresence initial={false}>
-              {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="relative flex-shrink-0"
-                >
-                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                    <ChevronDown className="w-3.5 h-3.5 text-[--text-muted]" />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-
-          <AnimatePresence initial={false}>
-            {isExpanded && !collapsed && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="ml-3 mt-0.5 mb-0.5 space-y-0.5 pl-3 border-l border-[--border]">
-                  {children!.map(({ href: ch, label: cl, icon: CI }) => {
-                    const ca = pathname === ch;
-                    return (
-                      <Link
-                        key={ch}
-                        href={ch}
-                        onClick={onMobileClose}
-                        className={`
-                          relative flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-[13px] font-medium
-                          transition-all duration-150 group
-                          ${ca
-                            ? 'bg-[--accent-dim] text-mint-400'
-                            : 'text-[--text-secondary] hover:bg-[--surface-3] hover:text-[--text-primary]'
-                          }
-                        `}
-                      >
-                        {ca && (
-                          <motion.div
-                            layoutId="sidebar-active"
-                            className="absolute inset-0 rounded-lg bg-[--accent-dim] border border-mint-500/20"
-                            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                          />
-                        )}
-                        <CI className={`relative w-3.5 h-3.5 flex-shrink-0 ${ca ? 'text-mint-400' : 'text-[--text-muted] group-hover:text-[--text-secondary]'} transition-colors`} />
-                        <span className="relative whitespace-nowrap overflow-hidden">{cl}</span>
-                        {ca && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="relative ml-auto w-1.5 h-1.5 rounded-full bg-mint-400"
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      );
-    }
 
     return (
       <Link
@@ -241,7 +124,7 @@ export default function UserSidebar({
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="relative ml-auto w-1.5 h-1.5 rounded-full bg-mint-400"
+            className="relative ml-auto w-1.5 h-1.5 rounded-full bg-mint-400 flex-shrink-0"
           />
         )}
       </Link>
