@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/LanguageContext';
 
 const DESIGN_TYPES = [
   { value: 'modern', label: 'Modern' },
@@ -59,7 +60,6 @@ function ColorPicker({ label, value, onChange, presets }: {
           onClick={() => inputRef.current?.click()}
           className="w-10 h-10 rounded-lg border-2 border-white/10 shadow-lg flex-shrink-0 transition-transform hover:scale-105 active:scale-95"
           style={{ backgroundColor: value }}
-          title="Klik untuk pilih warna"
         />
         <input ref={inputRef} type="color" className="sr-only" value={value} onChange={(e) => onChange(e.target.value)} />
         <div className="flex-1 min-w-0 flex rounded-lg overflow-hidden border border-gray-600">
@@ -101,6 +101,7 @@ function ColorPicker({ label, value, onChange, presets }: {
 
 export default function WebsitePage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [isSmart, setIsSmart] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -164,11 +165,11 @@ export default function WebsitePage() {
         } catch {}
         setLoading(false);
       })
-      .catch(() => { setError('Gagal memuat data'); setLoading(false); });
-  }, [router]);
+      .catch(() => { setError(t('website.errorLoad')); setLoading(false); });
+  }, [router, t]);
 
   useEffect(() => {
-    if (success) { const t = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(t); }
+    if (success) { const timer = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(timer); }
   }, [success]);
 
   async function handleHeroSearch() {
@@ -180,10 +181,10 @@ export default function WebsitePage() {
       if (Array.isArray(data)) {
         setHeroSearchResults(data);
       } else {
-        setError('Gagal mencari gambar');
+        setError(t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal mencari gambar');
+      setError(t('common.errorLoad'));
     }
     setHeroSearching(false);
   }
@@ -204,7 +205,7 @@ export default function WebsitePage() {
       const compressed = await compressImage(file);
       setHeroImagePreview(compressed);
     } catch {
-      setError('Gagal memproses gambar');
+      setError(t('common.errorLoad'));
     }
   }
 
@@ -230,7 +231,7 @@ export default function WebsitePage() {
 
   async function handleVideoUpload(file: File) {
     if (!file.type.includes('mp4') && file.type !== 'video/mp4') {
-      setVideoError('Hanya file MP4 yang didukung');
+      setVideoError(t('common.errorLoad'));
       return;
     }
     setVideoUploading(true);
@@ -256,24 +257,24 @@ export default function WebsitePage() {
               setVideoUrl(data.url);
               setVideoUploadProgress(100);
             } else {
-              setVideoError(data.error || 'Upload gagal');
+              setVideoError(data.error || t('common.errorLoad'));
             }
           } catch {
-            setVideoError('Upload gagal');
+            setVideoError(t('common.errorLoad'));
           }
         } else {
           try {
             const data = JSON.parse(xhr.responseText);
-            setVideoError(data.error || `Upload gagal (${xhr.status})`);
+            setVideoError(data.error || t('common.errorLoad'));
           } catch {
-            setVideoError(`Upload gagal (${xhr.status})`);
+            setVideoError(t('common.errorLoad'));
           }
         }
         resolve();
       });
       xhr.addEventListener('error', () => {
         setVideoUploading(false);
-        setVideoError('Upload gagal, periksa koneksi Anda');
+        setVideoError(t('common.errorServer'));
         resolve();
       });
       xhr.open('POST', '/api/user/video');
@@ -282,7 +283,7 @@ export default function WebsitePage() {
   }
 
   async function handleVideoDelete() {
-    if (!confirm('Hapus video hero?')) return;
+    if (!confirm(t('website.videoLabel'))) return;
     setVideoDeleting(true);
     setVideoError('');
     try {
@@ -292,10 +293,10 @@ export default function WebsitePage() {
         setVideoUrl(null);
         if (videoFileInputRef.current) videoFileInputRef.current.value = '';
       } else {
-        setVideoError(data.error || 'Gagal menghapus video');
+        setVideoError(data.error || t('common.errorLoad'));
       }
     } catch {
-      setVideoError('Gagal menghubungi server');
+      setVideoError(t('common.errorServer'));
     }
     setVideoDeleting(false);
   }
@@ -322,7 +323,7 @@ export default function WebsitePage() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('Pengaturan website berhasil disimpan!');
+        setSuccess(t('website.success'));
         // Re-fetch to get updated hero image URL
         const refetch = await fetch('/api/user/store');
         const refetchData = await refetch.json();
@@ -333,10 +334,10 @@ export default function WebsitePage() {
         setHeroSelectedUrl(null);
         setRemoveHeroImage(false);
       } else {
-        setError(data.error || 'Gagal menyimpan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
     setSaving(false);
   }
@@ -354,11 +355,9 @@ export default function WebsitePage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-[--text-primary] mb-2">Fitur Terkunci</h3>
-      <p className="text-[--text-muted] text-sm leading-relaxed">
-        Layanan ini bisa didapatkan dengan berlangganan paket <span className="text-violet-300 font-semibold">SMART</span>
-      </p>
-      <p className="text-[--text-muted] text-xs mt-2">Hubungi admin untuk upgrade paket Anda.</p>
+      <h3 className="text-lg font-semibold text-[--text-primary] mb-2">{t('website.lockedTitle')}</h3>
+      <p className="text-[--text-muted] text-sm leading-relaxed">{t('website.lockedMsg')}</p>
+      <p className="text-[--text-muted] text-xs mt-2">{t('website.lockedHint')}</p>
     </div>
   );
 
@@ -381,50 +380,50 @@ export default function WebsitePage() {
 
       {/* Website Settings Form */}
       <div className="page-card p-6">
-        <p className="section-label mb-5">Pengaturan Website</p>
+        <p className="section-label mb-5">{t('website.title')}</p>
 
         <form onSubmit={handleSave} className="space-y-4">
           {/* Subdomain */}
           <div>
-            <label className="form-label">Subdomain</label>
+            <label className="form-label">{t('website.subdomainLabel')}</label>
             <div className="flex rounded-xl overflow-hidden border border-[--border] focus-within:border-mint-500/60 focus-within:ring-1 focus-within:ring-mint-500/20 transition-all">
               <input
                 type="text"
                 className="flex-1 min-w-0 px-3.5 py-2.5 bg-[--surface-3] text-sm text-[--text-primary] placeholder:text-[--text-muted] outline-none"
                 value={form.store_subdomain}
                 onChange={(e) => setForm({ ...form, store_subdomain: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
-                placeholder="nama-toko"
+                placeholder={t('website.subdomainPlaceholder')}
               />
               <span className="px-3 py-2.5 bg-[--surface-3]/80 text-[--text-muted] text-xs whitespace-nowrap flex items-center border-l border-[--border] select-none">.aiminassist.com</span>
             </div>
-            <p className="form-hint">Hanya huruf kecil, angka, dan strip (-)</p>
+            <p className="form-hint">{t('website.subdomainHint')}</p>
           </div>
 
           {/* Design Template */}
           <div>
-            <label className="form-label">Template Desain</label>
+            <label className="form-label">{t('website.templateLabel')}</label>
             <select
               className="form-select"
               value={form.store_design_type}
               onChange={(e) => setForm({ ...form, store_design_type: e.target.value })}
             >
-              {DESIGN_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {DESIGN_TYPES.map((dt) => <option key={dt.value} value={dt.value}>{dt.label}</option>)}
             </select>
-            <p className="form-hint">Pilih template tampilan website Anda</p>
+            <p className="form-hint">{t('website.templateHint')}</p>
           </div>
 
           {/* Theme Colors */}
           <div>
-            <label className="form-label mb-3">Warna Tema</label>
+            <label className="form-label mb-3">{t('website.colorsTitle')}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ColorPicker
-                label="Warna Utama"
+                label={t('website.primaryColor')}
                 value={form.store_theme_primary}
                 onChange={(v) => setForm({ ...form, store_theme_primary: v })}
                 presets={['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#0ea5e9','#3b82f6']}
               />
               <ColorPicker
-                label="Warna Background"
+                label={t('website.bgColor')}
                 value={form.store_theme_background}
                 onChange={(v) => setForm({ ...form, store_theme_background: v })}
                 presets={['#0f172a','#1e1b4b','#0c0a09','#111827','#1a1a2e','#0d1117','#ffffff','#f8fafc','#f1f5f9','#e2e8f0']}
@@ -434,45 +433,45 @@ export default function WebsitePage() {
 
           {/* Hero Section */}
           <div>
-            <label className="form-label">Judul Hero</label>
+            <label className="form-label">{t('website.heroTitle')}</label>
             <input
               type="text"
               className="form-input"
               value={form.store_hero_title}
               onChange={(e) => setForm({ ...form, store_hero_title: e.target.value })}
-              placeholder="Selamat datang di toko kami"
+              placeholder={t('website.heroTitlePlaceholder')}
             />
-            <p className="form-hint">Judul utama yang tampil di bagian atas website</p>
+            <p className="form-hint">{t('website.heroTitleHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Subtitle Hero</label>
+            <label className="form-label">{t('website.heroSubtitle')}</label>
             <input
               type="text"
               className="form-input"
               value={form.store_hero_subtitle}
               onChange={(e) => setForm({ ...form, store_hero_subtitle: e.target.value })}
-              placeholder="Deskripsi singkat tentang toko Anda"
+              placeholder={t('website.heroSubtitlePlaceholder')}
             />
-            <p className="form-hint">Teks pendukung di bawah judul hero</p>
+            <p className="form-hint">{t('website.heroSubtitleHint')}</p>
           </div>
 
           {/* About Us */}
           <div>
-            <label className="form-label">Tentang Kami</label>
+            <label className="form-label">{t('website.aboutLabel')}</label>
             <textarea
               rows={5}
               className="form-textarea"
               value={form.store_about_us}
               onChange={(e) => setForm({ ...form, store_about_us: e.target.value })}
-              placeholder="Ceritakan sejarah, visi, dan nilai-nilai toko Anda..."
+              placeholder={t('website.aboutPlaceholder')}
             />
-            <p className="form-hint">Ditampilkan di halaman About pada website Anda</p>
+            <p className="form-hint">{t('website.aboutHint')}</p>
           </div>
 
           {/* Hero Image */}
           <div>
-            <label className="form-label">Gambar Hero</label>
+            <label className="form-label">{t('website.heroImageLabel')}</label>
 
             {hasHeroImage ? (
               <div className="space-y-2">
@@ -492,7 +491,7 @@ export default function WebsitePage() {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  Hapus gambar
+                  {t('website.videoDelete')}
                 </button>
               </div>
             ) : (
@@ -502,7 +501,7 @@ export default function WebsitePage() {
                   <input
                     type="text"
                     className="form-input flex-1"
-                    placeholder="Cari gambar hero... (contoh: salon, office)"
+                    placeholder={t('website.heroImageSearch')}
                     value={heroSearchQuery}
                     onChange={(e) => setHeroSearchQuery(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleHeroSearch(); } }}
@@ -520,7 +519,7 @@ export default function WebsitePage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     )}
-                    Cari
+                    {t('common.search')}
                   </button>
                 </div>
 
@@ -565,18 +564,18 @@ export default function WebsitePage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Upload gambar sendiri
+                    {t('website.heroImageUpload')}
                   </button>
                 </div>
               </div>
             )}
-            <p className="text-xs text-[--text-muted] mt-1">Gambar latar belakang di bagian hero website</p>
+            <p className="text-xs text-[--text-muted] mt-1">{t('website.heroImageHint')}</p>
           </div>
 
           {/* Hero Video (Elegant template) */}
           <div>
             <label className="form-label">
-              Video Hero
+              {t('website.videoLabel')}
               <span className="ml-2 font-normal text-[10px] bg-[--surface-3] border border-[--border] text-[--text-muted] px-1.5 py-0.5 rounded-md">Elegant</span>
             </label>
 
@@ -610,7 +609,7 @@ export default function WebsitePage() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
-                    Ganti video
+                    {t('website.videoChange')}
                   </button>
                   <button
                     type="button"
@@ -621,14 +620,14 @@ export default function WebsitePage() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    {videoDeleting ? 'Menghapus...' : 'Hapus video'}
+                    {videoDeleting ? t('common.saving') : t('website.videoDelete')}
                   </button>
                 </div>
               </div>
             ) : videoUploading ? (
               <div className="rounded-xl bg-[--surface-3] border border-[--border] p-4 space-y-2">
                 <div className="flex items-center justify-between text-xs text-[--text-muted]">
-                  <span>Mengupload video...</span>
+                  <span>{t('website.uploadingVideo')}</span>
                   <span>{videoUploadProgress}%</span>
                 </div>
                 <div className="h-1.5 bg-[--surface-1] rounded-full overflow-hidden">
@@ -648,7 +647,7 @@ export default function WebsitePage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                   </svg>
-                  Upload video MP4
+                  {t('website.videoUpload')}
                 </button>
               </div>
             )}
@@ -663,7 +662,7 @@ export default function WebsitePage() {
                 if (f) handleVideoUpload(f);
               }}
             />
-            <p className="form-hint">Video sinematik untuk latar belakang hero pada template Elegant. Maks 500 MB.</p>
+            <p className="form-hint">{t('website.videoHint')}</p>
           </div>
 
           {/* Preview Link */}
@@ -689,7 +688,7 @@ export default function WebsitePage() {
           {/* Save Button */}
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="btn-primary text-sm !py-2.5 !px-6">
-              {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>
@@ -702,12 +701,12 @@ export default function WebsitePage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
           <div>
-            <span className="text-[--text-primary] text-sm font-medium">Layanan</span>
-            <p className="text-[--text-muted] text-xs">Kelola layanan yang ditampilkan di website Anda</p>
+            <span className="text-[--text-primary] text-sm font-medium">{t('website.servicesCard')}</span>
+            <p className="text-[--text-muted] text-xs">{t('website.servicesCardDesc')}</p>
           </div>
         </div>
         <a href="/user/services" className="text-mint-400 hover:text-mint-300 text-sm font-medium transition-colors flex items-center gap-1">
-          Kelola
+          {t('common.edit')}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

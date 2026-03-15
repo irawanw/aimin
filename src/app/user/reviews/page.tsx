@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import UpgradeGate from '@/components/user/UpgradeGate';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface Review {
   id: number;
@@ -27,6 +28,7 @@ export default function ReviewsPage() {
 }
 
 function ReviewsContent() {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,10 +53,10 @@ function ReviewsContent() {
         setReviews(data);
       }
     } catch {
-      setError('Gagal memuat ulasan');
+      setError(t('reviews.errorLoad'));
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchReviews();
@@ -63,8 +65,8 @@ function ReviewsContent() {
   // Clear error after 4s
   useEffect(() => {
     if (error) {
-      const t = setTimeout(() => setError(''), 4000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setError(''), 4000);
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -104,10 +106,10 @@ function ReviewsContent() {
         setReviews(data.reviews);
         setError('');
       } else {
-        setError(data.error || 'Gagal membuat ulasan AI');
+        setError(data.error || t('reviews.errorGenerate'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
     setGenerating(false);
   }
@@ -142,11 +144,11 @@ function ReviewsContent() {
           fetchReviews();
         } else {
           setReviews(prev);
-          setError(data.error || 'Gagal mengubah ulasan');
+          setError(data.error || t('common.errorLoad'));
         }
       } catch {
         setReviews(prev);
-        setError('Gagal menghubungi server');
+        setError(t('common.errorServer'));
       }
     } else {
       // Optimistic add with temp id
@@ -173,11 +175,11 @@ function ReviewsContent() {
           setReviews((r) => r.map((x) => (x.id === tempId ? { ...x, id: data.id } : x)));
         } else {
           setReviews((r) => r.filter((x) => x.id !== tempId));
-          setError(data.error || 'Gagal menambah ulasan');
+          setError(data.error || t('common.errorLoad'));
         }
       } catch {
         setReviews((r) => r.filter((x) => x.id !== tempId));
-        setError('Gagal menghubungi server');
+        setError(t('common.errorServer'));
       }
     }
 
@@ -197,11 +199,11 @@ function ReviewsContent() {
       const data = await res.json();
       if (!data.success) {
         setReviews(prev);
-        setError(data.error || 'Gagal menghapus ulasan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
       setReviews(prev);
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
 
     setDeletingId(null);
@@ -247,7 +249,7 @@ function ReviewsContent() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-[--text-primary]">Ulasan Pelanggan</h2>
+          <h2 className="text-xl font-semibold text-[--text-primary]">{t('reviews.title')}</h2>
           {reviews.length > 0 && (
             <span className="text-xs bg-mint-500/20 text-mint-400 px-2 py-0.5 rounded-full font-medium">
               {reviews.length}
@@ -267,7 +269,7 @@ function ReviewsContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             )}
-            Generate AI
+            {t('reviews.generateBtn')}
           </button>
           <button
             onClick={openAddModal}
@@ -276,7 +278,7 @@ function ReviewsContent() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Tambah Ulasan
+            {t('reviews.addBtn')}
           </button>
         </div>
       </div>
@@ -287,8 +289,8 @@ function ReviewsContent() {
           <svg className="w-16 h-16 text-[--text-muted] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
           </svg>
-          <h3 className="text-[--text-muted] font-medium mb-1">Belum ada ulasan</h3>
-          <p className="text-[--text-muted] text-sm mb-5">Buat ulasan AI atau tambahkan testimonial pelanggan.</p>
+          <h3 className="text-[--text-muted] font-medium mb-1">{t('reviews.emptyTitle')}</h3>
+          <p className="text-[--text-muted] text-sm mb-5">{t('reviews.emptyDesc')}</p>
           <button onClick={handleGenerateAiReviews} disabled={generating} className="btn-primary text-sm !py-2.5 !px-5 inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50">
             {generating ? (
               <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
@@ -297,7 +299,7 @@ function ReviewsContent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             )}
-            Generate AI Reviews
+            {t('reviews.generateAiBtn')}
           </button>
         </div>
       ) : (
@@ -316,13 +318,13 @@ function ReviewsContent() {
                 {confirmDeleteId === review.id ? (
                   // Delete confirmation
                   <div className="text-center py-4">
-                    <p className="text-[--text-secondary] text-sm font-medium mb-1">Hapus ulasan ini?</p>
+                    <p className="text-[--text-secondary] text-sm font-medium mb-1">{t('reviews.deleteConfirm')}</p>
                     <div className="flex justify-center gap-2 mt-4">
                       <button
                         onClick={() => setConfirmDeleteId(null)}
                         className="px-4 py-2 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                       >
-                        Batal
+                        {t('common.cancel')}
                       </button>
                       <button
                         onClick={() => handleDelete(review.id)}
@@ -332,7 +334,7 @@ function ReviewsContent() {
                         {deletingId === review.id && (
                           <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full inline-block" />
                         )}
-                        Hapus
+                        {t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -355,7 +357,7 @@ function ReviewsContent() {
                         </div>
                       </div>
                       <p className="text-[--text-muted] text-sm mt-2 leading-relaxed">{review.review_text}</p>
-                      <p className="text-[--text-muted] text-xs mt-2">Photo keyword: {review.reviewer_photo_keyword || 'default'}</p>
+                      <p className="text-[--text-muted] text-xs mt-2">{t('reviews.photoKeyInfo', { keyword: review.reviewer_photo_keyword || 'default' })}</p>
                     </div>
 
                     {/* Actions */}
@@ -407,7 +409,7 @@ function ReviewsContent() {
               {/* Modal header */}
               <div className="flex items-center justify-between p-5 border-b border-[--border]">
                 <h3 className="text-lg font-semibold text-[--text-primary]">
-                  {editingReview ? 'Edit Ulasan' : 'Tambah Ulasan'}
+                  {editingReview ? t('reviews.editTitle') : t('reviews.addTitle')}
                 </h3>
                 <button onClick={closeModal} className="text-[--text-muted] hover:text-[--text-secondary] text-xl leading-none">&times;</button>
               </div>
@@ -421,11 +423,11 @@ function ReviewsContent() {
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Nama Reviewer <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('reviews.nameLabel')} <span className="text-red-400">*</span></label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Contoh: Budi Santoso"
+                    placeholder={t('reviews.namePlaceholder')}
                     value={form.reviewer_name}
                     onChange={(e) => setForm({ ...form, reviewer_name: e.target.value })}
                     required
@@ -434,35 +436,35 @@ function ReviewsContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Keyword Foto (opsional)</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('reviews.photoKeyLabel')}</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="man1, woman1, dll"
+                    placeholder={t('reviews.photoKeyPlaceholder')}
                     value={form.reviewer_photo_keyword}
                     onChange={(e) => setForm({ ...form, reviewer_photo_keyword: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Rating</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('reviews.ratingLabel')}</label>
                   <select
                     className="form-select"
                     value={form.rating}
                     onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })}
                   >
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>{n} Bintang</option>
+                      <option key={n} value={n}>{t('reviews.ratingOption', { n })}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Ulasan <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('reviews.reviewLabel')} <span className="text-red-400">*</span></label>
                   <textarea
                     rows={4}
                     className="form-textarea"
-                    placeholder="Tulis ulasan pengalaman pelanggan..."
+                    placeholder={t('reviews.reviewPlaceholder')}
                     value={form.review_text}
                     onChange={(e) => setForm({ ...form, review_text: e.target.value })}
                     required
@@ -476,7 +478,7 @@ function ReviewsContent() {
                     onClick={closeModal}
                     className="px-5 py-2.5 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                   >
-                    Batal
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -486,7 +488,7 @@ function ReviewsContent() {
                     {saving && (
                       <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
                     )}
-                    {editingReview ? 'Simpan' : 'Tambah'}
+                    {editingReview ? t('common.save') : t('common.add')}
                   </button>
                 </div>
               </form>

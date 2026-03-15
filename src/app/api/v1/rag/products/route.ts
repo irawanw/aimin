@@ -10,14 +10,19 @@ const API_KEY = process.env.API_KEY || '';
  *
  * Request:
  *   { folder, query, top_k?, price?, price_min?, price_max? }
- *   All price filters are optional — any combination works, all are backward compatible.
  *   price     = budget ceiling shorthand (WHERE price <= price)
  *   price_min = minimum price  (WHERE price >= price_min)
  *   price_max = maximum price  (WHERE price <= price_max)
  *   If both price and price_max are given, the stricter (lower) ceiling is used.
  *
- * Response:
- *   { products: Product[], has_catalog: boolean }
+ * Response (grouped by product):
+ *   {
+ *     products: [{
+ *       name, category, score, price_min, price_max, description, image_url, currency,
+ *       variants: [{ id, sku, specs, price, stock_status, stock_qty, image_url }]
+ *     }],
+ *     has_catalog: boolean
+ *   }
  */
 export async function POST(req: Request) {
   const apiKey = req.headers.get('x-api-key') || '';
@@ -41,9 +46,9 @@ export async function POST(req: Request) {
     const effectiveMin = price_min != null ? Number(price_min) : null;
     const hasPriceFilter = effectiveMin != null || effectiveMax != null;
 
-    // Fetch more candidates from Qdrant when filtering by price,
-    // so SQL has enough rows after the WHERE clause
-    const qdrantTopK = hasPriceFilter ? top_k * 4 : top_k;
+    // Fetch more candidate groups from Qdrant when filtering by price,
+    // so there's enough slack after SQL-level variant filtering
+    const qdrantTopK = hasPriceFilter ? top_k * 3 : top_k;
 
     // ── 1. Semantic search ────────────────────────────────────────────────
     const ragRes = await fetch(`${RAG_SERVICE_URL}/products/query`, {
@@ -63,57 +68,119 @@ export async function POST(req: Request) {
       return NextResponse.json({ products: [], has_catalog: false });
     }
 
-    const ragProducts: Array<{ product_id: number; score: number }> =
-      ragData.products ?? (ragData.product_ids ?? []).map((id: number) => ({ product_id: id, score: 1 }));
+    const ragProducts: Array<{
+      product_name?: string;
+      product_category?: string;
+      product_id?: number;
+      score: number;
+    }> = ragData.products ?? [];
 
     if (!ragProducts.length) {
       return NextResponse.json({ products: [], has_catalog: true });
     }
 
-    const productIds = ragProducts.map((p) => p.product_id);
-    const scoreMap = new Map<number, number>(ragProducts.map((p) => [p.product_id, p.score]));
-
-    // ── 2. Hydrate from MySQL with optional price filters ─────────────────
-    const idPlaceholders = productIds.map(() => '?').join(',');
-    const conditions: string[] = [`id IN (${idPlaceholders})`, 'store_folder = ?', 'is_active = 1'];
-    const params: any[] = [...productIds, folder];
-
-    if (effectiveMin != null) {
-      conditions.push('price >= ?');
-      params.push(effectiveMin);
-    }
-    if (effectiveMax != null) {
-      conditions.push('price <= ?');
-      params.push(effectiveMax);
+    // Backward-compat check: old vectors store product_id, not product_name.
+    // Signal the caller to re-import the catalog to rebuild vectors in the new format.
+    if (ragProducts[0].product_id != null && ragProducts[0].product_name == null) {
+      console.warn('[RAG] Old product_id vector format detected — user must re-import catalog');
+      return NextResponse.json({ products: [], has_catalog: false });
     }
 
+    // Build score map keyed by lowercased product name
+    const scoreMap = new Map<string, number>();
+    for (const p of ragProducts) {
+      if (p.product_name) {
+        scoreMap.set(p.product_name.toLowerCase(), p.score);
+      }
+    }
+
+    const productNames = ragProducts
+      .map((p) => p.product_name)
+      .filter((name): name is string => typeof name === 'string' && name.trim().length > 0)
+      .map((name) => name.toLowerCase());
+
+    if (!productNames.length) {
+      return NextResponse.json({ products: [], has_catalog: true });
+    }
+
+    // ── 2. Hydrate ALL variants for matched products ──────────────────────
+    const namePlaceholders = productNames.map(() => '?').join(',');
     const [rows] = await pool.execute(
       `SELECT id, sku, name, category, price, currency,
               description, stock_status, stock_qty, image_url, specs
        FROM store_product_catalog
-       WHERE ${conditions.join(' AND ')}`,
-      params
+       WHERE store_folder = ?
+         AND LOWER(name) IN (${namePlaceholders})
+         AND is_active = 1`,
+      [folder, ...productNames]
     );
 
-    // ── 3. Re-rank by Qdrant score, return top_k ─────────────────────────
-    const products = (rows as any[])
-      .sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0))
-      .slice(0, top_k)
-      .map((p) => ({
-        id: p.id,
-        sku: p.sku || null,
-        name: p.name,
-        category: p.category || null,
-        price: p.price ? parseFloat(p.price) : null,
-        currency: p.currency || 'IDR',
-        description: p.description || null,
-        stock_status: p.stock_status,
-        stock_qty: p.stock_qty !== null ? parseInt(p.stock_qty) : null,
-        image_url: p.image_url || null,
-        specs: p.specs ? JSON.parse(p.specs) : {},
-      }));
+    const allVariants = rows as any[];
 
-    return NextResponse.json({ products, has_catalog: true });
+    // ── 3. Group variants by lowercased product name ──────────────────────
+    const grouped = new Map<string, any[]>();
+    for (const row of allVariants) {
+      const key = (row.name as string).toLowerCase();
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(row);
+    }
+
+    // ── 4. Build response, applying price filter at variant level ─────────
+    const productGroups: any[] = [];
+
+    for (const ragProduct of ragProducts) {
+      if (!ragProduct.product_name) continue;
+      const nameKey = ragProduct.product_name.toLowerCase();
+      const variants = grouped.get(nameKey) ?? [];
+
+      // Apply price filter at variant level
+      const filteredVariants = hasPriceFilter
+        ? variants.filter((v) => {
+            const p = v.price != null ? parseFloat(v.price) : null;
+            if (p === null) return false;
+            if (effectiveMin != null && p < effectiveMin) return false;
+            if (effectiveMax != null && p > effectiveMax) return false;
+            return true;
+          })
+        : variants;
+
+      // Skip product if no variants survive the filter
+      if (!filteredVariants.length) continue;
+
+      const prices = filteredVariants
+        .map((v) => (v.price != null ? parseFloat(v.price) : NaN))
+        .filter((p) => !isNaN(p));
+
+      const price_min_val = prices.length ? Math.min(...prices) : null;
+      const price_max_val = prices.length ? Math.max(...prices) : null;
+
+      const firstWithDesc = filteredVariants.find((v) => v.description);
+      const firstWithImg = filteredVariants.find((v) => v.image_url);
+
+      productGroups.push({
+        name: filteredVariants[0].name,
+        category: filteredVariants[0].category || null,
+        score: scoreMap.get(nameKey) ?? 0,
+        price_min: price_min_val,
+        price_max: price_max_val,
+        description: firstWithDesc?.description || null,
+        image_url: firstWithImg?.image_url || null,
+        currency: filteredVariants[0].currency || 'IDR',
+        variants: filteredVariants.map((v) => ({
+          id: v.id,
+          sku: v.sku || null,
+          specs: v.specs ? JSON.parse(v.specs) : {},
+          price: v.price != null ? parseFloat(v.price) : null,
+          stock_status: v.stock_status,
+          stock_qty: v.stock_qty !== null ? parseInt(v.stock_qty) : null,
+          image_url: v.image_url || null,
+        })),
+      });
+
+      if (productGroups.length >= top_k) break;
+    }
+
+    return NextResponse.json({ products: productGroups, has_catalog: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

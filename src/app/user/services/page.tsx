@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import UpgradeGate from '@/components/user/UpgradeGate';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface Service {
   id: number;
@@ -56,6 +57,7 @@ export default function ServicesPage() {
 }
 
 function ServicesContent() {
+  const { t } = useLanguage();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -68,7 +70,7 @@ function ServicesContent() {
   const [modalError, setModalError] = useState('');
 
   // Image state for modal
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // base64 from file upload
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null); // URL from search
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
@@ -92,10 +94,10 @@ function ServicesContent() {
         setServices(data);
       }
     } catch {
-      setError('Gagal memuat layanan');
+      setError(t('services.errorLoad'));
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchServices();
@@ -104,8 +106,8 @@ function ServicesContent() {
   // Clear error after 4s
   useEffect(() => {
     if (error) {
-      const t = setTimeout(() => setError(''), 4000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setError(''), 4000);
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -164,10 +166,10 @@ function ServicesContent() {
       if (Array.isArray(data)) {
         setSearchResults(data);
       } else {
-        setModalError('Gagal mencari gambar');
+        setModalError(t('common.errorLoad'));
       }
     } catch {
-      setModalError('Gagal mencari gambar');
+      setModalError(t('common.errorServer'));
     }
     setSearching(false);
   }
@@ -190,7 +192,7 @@ function ServicesContent() {
       const compressed = await compressImage(file);
       setImagePreview(compressed);
     } catch {
-      setModalError('Gagal memproses gambar');
+      setModalError(t('common.errorLoad'));
     }
   }
 
@@ -260,11 +262,11 @@ function ServicesContent() {
           fetchServices();
         } else {
           setServices(prev);
-          setError(data.error || 'Gagal mengubah layanan');
+          setError(data.error || t('common.errorLoad'));
         }
       } catch {
         setServices(prev);
-        setError('Gagal menghubungi server');
+        setError(t('common.errorServer'));
       }
     } else {
       // Optimistic add with temp id
@@ -291,11 +293,11 @@ function ServicesContent() {
           setServices((s) => s.map((x) => (x.id === tempId ? { ...x, id: data.id, image_url: data.image_url } : x)));
         } else {
           setServices((s) => s.filter((x) => x.id !== tempId));
-          setError(data.error || 'Gagal menambah layanan');
+          setError(data.error || t('common.errorLoad'));
         }
       } catch {
         setServices((s) => s.filter((x) => x.id !== tempId));
-        setError('Gagal menghubungi server');
+        setError(t('common.errorServer'));
       }
     }
 
@@ -315,11 +317,11 @@ function ServicesContent() {
       const data = await res.json();
       if (!data.success) {
         setServices(prev);
-        setError(data.error || 'Gagal menghapus layanan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
       setServices(prev);
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
 
     setDeletingId(null);
@@ -373,7 +375,7 @@ function ServicesContent() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-[--text-primary]">Layanan</h2>
+          <h2 className="text-xl font-semibold text-[--text-primary]">{t('services.title')}</h2>
           {services.length > 0 && (
             <span className="text-xs bg-mint-500/20 text-mint-400 px-2 py-0.5 rounded-full font-medium">
               {services.length}
@@ -387,7 +389,7 @@ function ServicesContent() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Layanan
+          {t('services.addBtn')}
         </button>
       </div>
 
@@ -397,13 +399,13 @@ function ServicesContent() {
           <svg className="w-16 h-16 text-[--text-muted] mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          <h3 className="text-[--text-muted] font-medium mb-1">Belum ada layanan</h3>
-          <p className="text-[--text-muted] text-sm mb-5">Tambahkan layanan pertama Anda untuk ditampilkan di website.</p>
+          <h3 className="text-[--text-muted] font-medium mb-1">{t('services.emptyTitle')}</h3>
+          <p className="text-[--text-muted] text-sm mb-5">{t('services.emptyDesc')}</p>
           <button onClick={openAddModal} className="btn-primary text-sm !py-2.5 !px-5 inline-flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Tambah Layanan
+            {t('services.addBtn')}
           </button>
         </div>
       ) : (
@@ -422,14 +424,14 @@ function ServicesContent() {
                 {confirmDeleteId === svc.id ? (
                   // Delete confirmation overlay
                   <div className="flex-1 flex flex-col items-center justify-center py-4 px-5">
-                    <p className="text-[--text-secondary] text-sm font-medium mb-1">Hapus layanan ini?</p>
+                    <p className="text-[--text-secondary] text-sm font-medium mb-1">{t('services.deleteConfirm')}</p>
                     <p className="text-[--text-muted] text-xs mb-4 text-center line-clamp-1">{svc.title}</p>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setConfirmDeleteId(null)}
                         className="px-4 py-2 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                       >
-                        Batal
+                        {t('common.cancel')}
                       </button>
                       <button
                         onClick={() => handleDelete(svc.id)}
@@ -439,7 +441,7 @@ function ServicesContent() {
                         {deletingId === svc.id && (
                           <span className="animate-spin w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full inline-block" />
                         )}
-                        Hapus
+                        {t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -469,7 +471,7 @@ function ServicesContent() {
                         )}
                         {svc.image_url && (
                           <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
-                            {svc.image_url.startsWith('http') ? 'Gambar Unsplash' : 'Gambar custom'}
+                            {svc.image_url.startsWith('http') ? t('services.unsplashBadge') : t('services.customBadge')}
                           </span>
                         )}
                       </div>
@@ -484,7 +486,7 @@ function ServicesContent() {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Edit
+                        {t('common.edit')}
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(svc.id)}
@@ -493,7 +495,7 @@ function ServicesContent() {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus
+                        {t('common.delete')}
                       </button>
                     </div>
                   </>
@@ -526,7 +528,7 @@ function ServicesContent() {
               {/* Modal header */}
               <div className="flex items-center justify-between p-5 border-b border-[--border]">
                 <h3 className="text-lg font-semibold text-[--text-primary]">
-                  {editingService ? 'Edit Layanan' : 'Tambah Layanan'}
+                  {editingService ? t('services.editTitle') : t('services.addTitle')}
                 </h3>
                 <button onClick={closeModal} className="text-[--text-muted] hover:text-[--text-secondary] text-xl leading-none">&times;</button>
               </div>
@@ -540,11 +542,11 @@ function ServicesContent() {
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Judul Layanan <span className="text-red-400">*</span></label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('services.titleLabel')} <span className="text-red-400">*</span></label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Contoh: Cuci Sepatu Premium"
+                    placeholder={t('services.titlePlaceholder')}
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     required
@@ -553,22 +555,22 @@ function ServicesContent() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Deskripsi</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('services.descLabel')}</label>
                   <textarea
                     rows={3}
                     className="form-textarea"
-                    placeholder="Deskripsi singkat layanan Anda"
+                    placeholder={t('services.descPlaceholder')}
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Harga</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('services.priceLabel')}</label>
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Rp 100.000"
+                    placeholder={t('services.pricePlaceholder')}
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                   />
@@ -576,7 +578,7 @@ function ServicesContent() {
 
                 {/* Image Section */}
                 <div>
-                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">Gambar Layanan</label>
+                  <label className="block text-xs font-medium text-[--text-secondary] mb-1.5">{t('services.imageLabel')}</label>
 
                   {hasImage ? (
                     /* Selected image preview */
@@ -585,7 +587,7 @@ function ServicesContent() {
                         <img src={currentPreviewSrc!} alt="Preview" className="w-full h-40 object-cover" />
                         <div className="absolute top-2 right-2">
                           <span className={`text-xs ${isCustomUpload ? 'bg-green-500/80' : isSearchImage ? 'bg-blue-500/80' : 'bg-green-500/80'} text-white px-2 py-0.5 rounded-full`}>
-                            {isCustomUpload ? 'Upload' : isSearchImage ? 'Unsplash' : 'Gambar'}
+                            {isCustomUpload ? t('services.uploadTab') : isSearchImage ? t('services.unsplashTab') : t('services.imageTab')}
                           </span>
                         </div>
                       </div>
@@ -597,7 +599,7 @@ function ServicesContent() {
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus gambar
+                        {t('services.removeImage')}
                       </button>
                     </div>
                   ) : (
@@ -608,7 +610,7 @@ function ServicesContent() {
                         <input
                           type="text"
                           className="form-input flex-1"
-                          placeholder="Cari gambar... (contoh: salon, food)"
+                          placeholder={t('services.searchPlaceholder')}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleImageSearch(); } }}
@@ -626,7 +628,7 @@ function ServicesContent() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                           )}
-                          Cari
+                          {t('common.search')}
                         </button>
                       </div>
 
@@ -671,7 +673,7 @@ function ServicesContent() {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          Upload gambar sendiri
+                          {t('services.uploadOwn')}
                         </button>
                       </div>
                     </div>
@@ -685,7 +687,7 @@ function ServicesContent() {
                     onClick={closeModal}
                     className="px-5 py-2.5 rounded-xl text-sm text-[--text-muted] hover:text-[--text-primary] bg-[--surface-3] hover:bg-[--surface-2] transition-colors"
                   >
-                    Batal
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -695,7 +697,7 @@ function ServicesContent() {
                     {saving && (
                       <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
                     )}
-                    {editingService ? 'Simpan' : 'Tambah'}
+                    {editingService ? t('common.save') : t('common.add')}
                   </button>
                 </div>
               </form>

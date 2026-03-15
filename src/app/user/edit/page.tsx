@@ -3,27 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const STORE_TYPES = [
-  { label: 'toko', value: 'store' },
-  { label: 'jasa', value: 'services' },
-  { label: 'lainnya', value: 'others' },
-];
-
-const FULFILLMENT_OPTIONS = {
-  store: [
-    { label: 'Barang dikirim', value: 'pickup' },
-    { label: 'Barang diambil', value: 'delivery' },
-  ],
-  services: [
-    { label: 'konsultasi awal', value: 'meeting_schedule' },
-    { label: 'reservasi tanggal tertentu', value: 'book_date' },
-    { label: 'reservasi rentang tanggal', value: 'book_date_range' },
-    { label: 'kunjungan ke lokasi customer', value: 'visit_location' },
-    { label: 'customer datang ke lokasi usaha', value: 'customer_visit' },
-  ],
-  others: [],
-};
+import { useLanguage } from '@/lib/LanguageContext';
 
 type FileType = 'image' | 'video' | 'document';
 
@@ -49,6 +29,7 @@ interface FileData {
 
 export default function UserEditPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -58,21 +39,19 @@ export default function UserEditPage() {
   const [form, setForm] = useState({
     store_name: '',
     store_type: 'store',
-    store_fulfillment: [] as string[],
     store_admin: '',
     store_admin_number: '',
     store_email: '',
     store_bot_always_on: 0,
     store_whatsapp_bot: 1,
     store_language: 'id',
+    dashboard_language: 'en',
     store_tagline: '',
     store_address: '',
     store_feature: '',
-    store_knowledge_base: '',
   });
 
   // File management state
-  const [planMaxKb, setPlanMaxKb] = useState(500);
   const [fileData, setFileData] = useState<FileData>({ folder: '', total_images: 0, max_images: 20, files: [], products: [] });
   const [fileLoaded, setFileLoaded] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -85,13 +64,11 @@ export default function UserEditPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Knowledge base file upload state
-  const [kbUploading, setKbUploading] = useState(false);
-  const [kbMsg, setKbMsg] = useState('');
-  const [kbErr, setKbErr] = useState('');
-  const [kbProgress, setKbProgress] = useState(0);
-  const [kbStep, setKbStep] = useState('');
-  const kbFileInputRef = useRef<HTMLInputElement>(null);
+  const STORE_TYPES = [
+    { label: t('edit.typeStore'), value: 'store' },
+    { label: t('edit.typeService'), value: 'services' },
+    { label: t('edit.typeOther'), value: 'others' },
+  ];
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -110,96 +87,6 @@ export default function UserEditPage() {
     setFileLoaded(true);
   }, []);
 
-  const handleKbFileUpload = async (file: File) => {
-    setKbUploading(true);
-    setKbErr('');
-    setKbMsg('');
-    setKbProgress(0);
-    setKbStep('');
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/user/knowledge-base', { method: 'POST', body: formData });
-
-      if (!res.body) {
-        setKbErr('Upload gagal — tidak ada respons dari server');
-        setKbUploading(false);
-        return;
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        // SSE messages are separated by double newlines
-        const parts = buffer.split('\n\n');
-        buffer = parts.pop() || '';
-
-        for (const part of parts) {
-          if (!part.trim() || part.startsWith(':')) continue; // skip heartbeat comments
-          const lines = part.trim().split('\n');
-          let event = 'message';
-          let data = '';
-          for (const line of lines) {
-            if (line.startsWith('event: ')) event = line.slice(7).trim();
-            if (line.startsWith('data: ')) data = line.slice(6);
-          }
-          if (!data) continue;
-          const parsed = JSON.parse(data);
-
-          if (event === 'progress') {
-            setKbProgress(parsed.pct || 0);
-            setKbStep(parsed.message || '');
-          } else if (event === 'done') {
-            setKbProgress(100);
-            setKbStep('');
-            setForm((prev) => ({ ...prev, store_knowledge_base: parsed.text || '' }));
-            setKbMsg(`Berhasil — ${(parsed.characters || 0).toLocaleString()} karakter${parsed.used_llm_formatter ? ' (diformat AI)' : ''}`);
-            setKbUploading(false);
-          } else if (event === 'error') {
-            setKbErr(parsed.message || 'Terjadi kesalahan');
-            setKbUploading(false);
-            setKbProgress(0);
-            setKbStep('');
-          }
-        }
-      }
-    } catch (e: any) {
-      setKbErr(e.message || 'Terjadi kesalahan');
-      setKbUploading(false);
-      setKbProgress(0);
-      setKbStep('');
-    } finally {
-      if (kbFileInputRef.current) kbFileInputRef.current.value = '';
-    }
-  };
-
-  const handleKbClear = async () => {
-    if (!confirm('Hapus seluruh knowledge base?')) return;
-    setKbUploading(true);
-    setKbErr('');
-    setKbMsg('');
-    try {
-      const res = await fetch('/api/user/knowledge-base', { method: 'DELETE' });
-      if (!res.ok) {
-        const data = await res.json();
-        setKbErr(data.error || 'Gagal menghapus');
-        return;
-      }
-      setForm((prev) => ({ ...prev, store_knowledge_base: '' }));
-      setKbMsg('Knowledge base dihapus');
-    } catch (e: any) {
-      setKbErr(e.message);
-    } finally {
-      setKbUploading(false);
-    }
-  };
-
   useEffect(() => {
     fetch('/api/user/store')
       .then((r) => {
@@ -208,39 +95,37 @@ export default function UserEditPage() {
       })
       .then((data) => {
         if (!data || data.error) return;
-        setPlanMaxKb(data.plan_max_kb ?? 500);
         setWhatsappNumber(data.store_whatsapp_jid?.replace('@s.whatsapp.net', '') || '');
         setForm({
           store_name: data.store_name || '',
           store_type: data.store_type || 'store',
-          store_fulfillment: parseFulfillment(data.store_fulfillment),
           store_admin: data.store_admin || '',
           store_admin_number: data.store_admin_number || '',
           store_email: data.store_email || '',
           store_bot_always_on: data.store_bot_always_on ? 1 : 0,
           store_whatsapp_bot: data.store_whatsapp_bot !== undefined ? (data.store_whatsapp_bot ? 1 : 0) : 1,
           store_language: data.store_language || 'id',
+          dashboard_language: data.dashboard_language || 'en',
           store_tagline: data.store_tagline || '',
           store_address: data.store_address || '',
           store_feature: data.store_feature || '',
-          store_knowledge_base: data.store_knowledge_base || '',
         });
         setLoading(false);
       })
-      .catch(() => { setError('Gagal memuat data'); setLoading(false); });
+      .catch(() => { setError(t('common.errorLoad')); setLoading(false); });
 
     fetchFiles();
-  }, [router, fetchFiles]);
+  }, [router, fetchFiles, t]);
 
   // Clear messages
   useEffect(() => {
-    if (imgMsg) { const t = setTimeout(() => setImgMsg(''), 4000); return () => clearTimeout(t); }
+    if (imgMsg) { const timer = setTimeout(() => setImgMsg(''), 4000); return () => clearTimeout(timer); }
   }, [imgMsg]);
   useEffect(() => {
-    if (imgErr) { const t = setTimeout(() => setImgErr(''), 6000); return () => clearTimeout(t); }
+    if (imgErr) { const timer = setTimeout(() => setImgErr(''), 6000); return () => clearTimeout(timer); }
   }, [imgErr]);
   useEffect(() => {
-    if (success) { const t = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(t); }
+    if (success) { const timer = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(timer); }
   }, [success]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -252,19 +137,16 @@ export default function UserEditPage() {
       const res = await fetch('/api/user/store', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          store_fulfillment: JSON.stringify(form.store_fulfillment),
-        }),
+        body: JSON.stringify({ ...form }),
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('Data toko berhasil diperbarui!');
+        setSuccess(t('edit.success'));
       } else {
-        setError(data.error || 'Gagal menyimpan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
     setSaving(false);
   }
@@ -341,15 +223,15 @@ export default function UserEditPage() {
             setTagValues((prev) => ({ ...prev, [result.filenames[0]]: '' }));
           }
         } else {
-          errors.push(`File ${i + 1}: ${result.error || 'Gagal'}`);
+          errors.push(`File ${i + 1}: ${result.error || t('common.errorLoad')}`);
         }
       } catch {
-        errors.push(`File ${i + 1}: Upload gagal`);
+        errors.push(`File ${i + 1}: ${t('common.errorServer')}`);
       }
     }
 
     if (uploaded > 0) {
-      setImgMsg(`${uploaded} file berhasil diupload`);
+      setImgMsg(t('edit.filesUploaded', { count: uploaded }));
       setSelectedFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
       await fetchFiles();
@@ -359,16 +241,16 @@ export default function UserEditPage() {
   };
 
   const handleDelete = async (filename: string) => {
-    if (!confirm(`Hapus file ${filename}?`)) return;
+    if (!confirm(t('edit.deleteFileConfirm', { filename }))) return;
     setDeletingFile(filename);
     try {
       const res = await fetch(`/api/user/images?filename=${encodeURIComponent(filename)}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
-        setImgMsg(`File ${filename} dihapus`);
+        setImgMsg(t('edit.fileDeleted', { filename }));
         await fetchFiles();
       } else {
-        setImgErr(result.error || 'Gagal menghapus');
+        setImgErr(result.error || t('common.errorLoad'));
       }
     } catch (err: any) {
       setImgErr(err.message);
@@ -387,7 +269,7 @@ export default function UserEditPage() {
         body: JSON.stringify({ product: tag }),
       });
       const result = await res.json();
-      if (!result.success) setImgErr(result.error || 'Gagal menyimpan tag');
+      if (!result.success) setImgErr(result.error || t('common.errorLoad'));
     } catch (err: any) {
       setImgErr(err.message);
     } finally {
@@ -422,91 +304,52 @@ export default function UserEditPage() {
 
       {/* Edit Form */}
       <div className="page-card p-6">
-        <p className="section-label mb-5">Informasi Toko</p>
+        <p className="section-label mb-5">{t('edit.title')}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="form-label">Nomor WhatsApp</label>
+            <label className="form-label">{t('edit.whatsappLabel')}</label>
             <input type="text" className="form-input opacity-50 cursor-not-allowed" value={whatsappNumber} disabled />
-            <p className="form-hint">Nomor WhatsApp tidak dapat diubah</p>
+            <p className="form-hint">{t('edit.whatsappHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Nama Toko <span className="text-red-400">*</span></label>
+            <label className="form-label">{t('edit.storeNameLabel')} <span className="text-red-400">*</span></label>
             <input type="text" required className="form-input" value={form.store_name} onChange={(e) => setForm({ ...form, store_name: e.target.value })} />
           </div>
 
           <div>
-            <label className="form-label">Tipe Toko</label>
-            <select className="form-select" value={form.store_type} onChange={(e) => setForm({ ...form, store_type: e.target.value, store_fulfillment: [] })}>
-              {STORE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            <label className="form-label">{t('edit.storeTypeLabel')}</label>
+            <select className="form-select" value={form.store_type} onChange={(e) => setForm({ ...form, store_type: e.target.value })}>
+              {STORE_TYPES.map((st) => <option key={st.value} value={st.value}>{st.label}</option>)}
             </select>
-            <p className="form-hint">Pilih jenis usaha Anda</p>
+            <p className="form-hint">{t('edit.storeTypeHint')}</p>
           </div>
 
-          {/* Fulfillment Options */}
-          {(form.store_type === 'store' || form.store_type === 'services') && (
-            <div>
-              <label className="form-label">
-                {form.store_type === 'store' ? 'Metode Pengiriman' : 'Metode Layanan'}
-              </label>
-              <div className="space-y-2.5 mt-0.5">
-                {FULFILLMENT_OPTIONS[form.store_type as keyof typeof FULFILLMENT_OPTIONS].map((opt) => (
-                  <label key={opt.value} className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-4.5 h-4.5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${form.store_fulfillment.includes(opt.value) ? 'bg-mint-600 border-mint-600' : 'bg-[--surface-3] border-[--border] group-hover:border-mint-500/50'}`} style={{width:'18px',height:'18px'}}>
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={form.store_fulfillment.includes(opt.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setForm({ ...form, store_fulfillment: [...form.store_fulfillment, opt.value] });
-                          } else {
-                            setForm({ ...form, store_fulfillment: form.store_fulfillment.filter(v => v !== opt.value) });
-                          }
-                        }}
-                      />
-                      {form.store_fulfillment.includes(opt.value) && (
-                        <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="2 6 5 9 10 3" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="text-sm text-[--text-secondary]">{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="form-hint">
-                {form.store_type === 'store'
-                  ? 'Pilih metode pengiriman yang tersedia di toko Anda'
-                  : 'Pilih metode layanan yang tersedia untuk jasa Anda'}
-              </p>
-            </div>
-          )}
 
           <div>
-            <label className="form-label">Nama Admin AI</label>
+            <label className="form-label">{t('edit.aiAdminLabel')}</label>
             <input type="text" className="form-input" value={form.store_admin} onChange={(e) => setForm({ ...form, store_admin: e.target.value })} />
-            <p className="form-hint">Nama yang akan digunakan AI saat membalas chat</p>
+            <p className="form-hint">{t('edit.aiAdminHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Nomor Admin</label>
-            <input type="text" className="form-input" value={form.store_admin_number} onChange={(e) => setForm({ ...form, store_admin_number: e.target.value })} placeholder="628123456789" />
-            <p className="form-hint">Nomor telepon admin untuk notifikasi</p>
+            <label className="form-label">{t('edit.adminNumberLabel')}</label>
+            <input type="text" className="form-input" value={form.store_admin_number} onChange={(e) => setForm({ ...form, store_admin_number: e.target.value })} placeholder={t('edit.adminNumberPlaceholder')} />
+            <p className="form-hint">{t('edit.adminNumberHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Email</label>
-            <input type="email" className="form-input" value={form.store_email} onChange={(e) => setForm({ ...form, store_email: e.target.value })} placeholder="email@example.com" />
-            <p className="form-hint">Alamat email untuk keperluan bisnis</p>
+            <label className="form-label">{t('edit.emailLabel')}</label>
+            <input type="email" className="form-input" value={form.store_email} onChange={(e) => setForm({ ...form, store_email: e.target.value })} placeholder={t('edit.emailPlaceholder')} />
+            <p className="form-hint">{t('edit.emailHint')}</p>
           </div>
 
           {/* Toggles */}
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="flex items-center justify-between px-3.5 py-3 rounded-xl bg-[--surface-3] border border-[--border]">
               <div>
-                <p className="text-xs font-medium text-[--text-secondary]">Bot Always On</p>
-                <p className="text-xs text-[--text-muted] mt-0.5">Selalu respon pesan masuk</p>
+                <p className="text-xs font-medium text-[--text-secondary]">{t('edit.botAlwaysOnLabel')}</p>
+                <p className="text-xs text-[--text-muted] mt-0.5">{t('edit.botAlwaysOnDesc')}</p>
               </div>
               <button
                 type="button"
@@ -519,8 +362,8 @@ export default function UserEditPage() {
             </div>
             <div className="flex items-center justify-between px-3.5 py-3 rounded-xl bg-[--surface-3] border border-[--border]">
               <div>
-                <p className="text-xs font-medium text-[--text-secondary]">WhatsApp Bot</p>
-                <p className="text-xs text-[--text-muted] mt-0.5">Proses pesan WhatsApp</p>
+                <p className="text-xs font-medium text-[--text-secondary]">{t('edit.waBotLabel')}</p>
+                <p className="text-xs text-[--text-muted] mt-0.5">{t('edit.waBotDesc')}</p>
               </div>
               <button
                 type="button"
@@ -534,137 +377,56 @@ export default function UserEditPage() {
           </div>
 
           <div>
-            <label className="form-label">Bahasa Bot</label>
+            <label className="form-label">{t('edit.languageLabel')}</label>
             <select
               className="form-select"
               value={form.store_language}
               onChange={(e) => setForm({ ...form, store_language: e.target.value })}
             >
-              <option value="id">Indonesia</option>
-              <option value="en">English</option>
+              <option value="id">{t('edit.langId')}</option>
+              <option value="en">{t('edit.langEn')}</option>
+              <option value="fr">{t('edit.langFr')}</option>
             </select>
-            <p className="form-hint">Bahasa yang digunakan AI saat membalas pesan pelanggan</p>
+            <p className="form-hint">{t('edit.languageHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Tagline</label>
-            <input type="text" className="form-input" value={form.store_tagline} onChange={(e) => setForm({ ...form, store_tagline: e.target.value })} placeholder="Slogan singkat toko Anda" />
-            <p className="form-hint">Slogan atau tagline toko Anda</p>
+            <label className="form-label">{t('edit.dashboardLanguageLabel')}</label>
+            <select
+              className="form-select"
+              value={form.dashboard_language}
+              onChange={(e) => setForm({ ...form, dashboard_language: e.target.value })}
+            >
+              <option value="en">{t('edit.langEn')}</option>
+              <option value="id">{t('edit.langId')}</option>
+              <option value="fr">{t('edit.langFr')}</option>
+            </select>
+            <p className="form-hint">{t('edit.dashboardLanguageHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Alamat Toko</label>
+            <label className="form-label">{t('edit.taglineLabel')}</label>
+            <input type="text" className="form-input" value={form.store_tagline} onChange={(e) => setForm({ ...form, store_tagline: e.target.value })} placeholder={t('edit.taglinePlaceholder')} />
+            <p className="form-hint">{t('edit.taglineHint')}</p>
+          </div>
+
+          <div>
+            <label className="form-label">{t('edit.addressLabel')}</label>
             <textarea rows={3} className="form-textarea" value={form.store_address} onChange={(e) => setForm({ ...form, store_address: e.target.value })} />
-            <p className="form-hint">Alamat lengkap toko atau lokasi pengiriman Anda</p>
+            <p className="form-hint">{t('edit.addressHint')}</p>
           </div>
 
           <div>
-            <label className="form-label">Fitur Produk</label>
+            <label className="form-label">{t('edit.featuresLabel')}</label>
             <textarea rows={4} className="form-textarea" value={form.store_feature} onChange={(e) => setForm({ ...form, store_feature: e.target.value })} />
-            <p className="form-hint">Jelaskan fitur-fitur unggulan produk Anda</p>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="form-label !mb-0">Knowledge Base</label>
-              <span className={`text-xs font-mono ${form.store_knowledge_base.length > planMaxKb ? 'text-red-400' : 'text-[--text-muted]'}`}>
-                {form.store_knowledge_base.length}/{planMaxKb}
-              </span>
-            </div>
-            <textarea
-              rows={6}
-              className="form-textarea"
-              value={form.store_knowledge_base}
-              onChange={(e) => {
-                if (e.target.value.length <= planMaxKb) setForm({ ...form, store_knowledge_base: e.target.value });
-              }}
-            />
-            <p className="form-hint">Informasi produk, harga, cara order, dll — digunakan AI untuk menjawab pertanyaan pelanggan</p>
-            {/* File Upload for KB — only for non-product stores */}
-            {form.store_type !== 'store' && <div className="mt-3 rounded-xl border border-dashed border-[--border] bg-[--surface-3]/50 p-4 space-y-3">
-              <p className="text-xs text-[--text-muted]">
-                <span className="font-medium text-[--text-secondary]">Unggah dokumen PDF / DOCX</span>
-                {' '}— teks akan diekstrak otomatis ke Knowledge Base
-              </p>
-
-              {/* Progress bar — shown while uploading */}
-              {kbUploading && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[--text-muted] truncate pr-2">{kbStep || 'Memproses...'}</span>
-                    <span className="text-xs font-mono text-[--text-muted] flex-shrink-0">{kbProgress}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-[--surface-3] overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500 ease-out"
-                      style={{
-                        width: `${kbProgress}%`,
-                        background: 'linear-gradient(90deg, var(--mint-500, #10b981), var(--mint-400, #34d399))',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {kbMsg && (
-                <div className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2 flex items-center justify-between">
-                  {kbMsg}
-                  <button onClick={() => setKbMsg('')} className="ml-2 text-green-500/50 hover:text-green-400">&times;</button>
-                </div>
-              )}
-              {kbErr && (
-                <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 flex items-center justify-between">
-                  {kbErr}
-                  <button onClick={() => setKbErr('')} className="ml-2 text-red-500/50 hover:text-red-400">&times;</button>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <input
-                  ref={kbFileInputRef}
-                  type="file"
-                  accept=".pdf,.docx"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleKbFileUpload(f);
-                  }}
-                />
-                <button
-                  type="button"
-                  disabled={kbUploading}
-                  onClick={() => kbFileInputRef.current?.click()}
-                  className="btn-ghost text-xs !py-1.5 !px-3 flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {kbUploading ? (
-                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                  )}
-                  {kbUploading ? 'Memproses...' : 'Pilih File'}
-                </button>
-                {form.store_knowledge_base.length > 0 && !kbUploading && (
-                  <button
-                    type="button"
-                    onClick={handleKbClear}
-                    className="text-xs text-red-400/70 hover:text-red-400 transition-colors"
-                  >
-                    Hapus KB
-                  </button>
-                )}
-              </div>
-            </div>}
+            <p className="form-hint">{t('edit.featuresHint')}</p>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button type="submit" disabled={saving} className="btn-primary text-sm !py-2.5 !px-6">
-              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
-            <Link href="/user" className="btn-ghost">Batal</Link>
+            <Link href="/user" className="btn-ghost">{t('common.cancel')}</Link>
           </div>
         </form>
       </div>
@@ -672,7 +434,7 @@ export default function UserEditPage() {
       {/* File Media & Dokumen */}
       <div className="page-card p-6">
         <div className="flex items-center justify-between mb-5">
-          <p className="section-label">File Media &amp; Dokumen</p>
+          <p className="section-label">{t('edit.mediaTitle')}</p>
           <span className="text-xs font-mono text-[--text-muted] bg-[--surface-3] px-2.5 py-1 rounded-lg border border-[--border]">
             {fileData.total_images}/{fileData.max_images}
           </span>
@@ -737,7 +499,7 @@ export default function UserEditPage() {
                     onClick={() => handleDelete(f.filename)}
                     disabled={deletingFile === f.filename}
                     className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg w-7 h-7 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
-                    title="Hapus"
+                    title={t('common.delete')}
                   >
                     {deletingFile === f.filename ? (
                       <span className="animate-spin w-3 h-3 border-2 border-white border-t-transparent rounded-full inline-block" />
@@ -775,14 +537,14 @@ export default function UserEditPage() {
 
         {/* Empty state */}
         {fileLoaded && fileData.files.length === 0 && (
-          <p className="text-[--text-muted] text-sm mb-4">Belum ada file yang diupload</p>
+          <p className="text-[--text-muted] text-sm mb-4">{t('edit.noFiles')}</p>
         )}
 
         {/* Upload Section */}
         {canUpload ? (
           <div>
             <hr className="border-[--border] mb-4" />
-            <p className="section-label mb-3">Upload File Baru</p>
+            <p className="section-label mb-3">{t('edit.uploadTitle')}</p>
 
             {/* Drop zone */}
             <div
@@ -806,9 +568,9 @@ export default function UserEditPage() {
               <svg className="w-9 h-9 mx-auto text-[--text-muted] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              <p className="text-sm text-[--text-muted]">Klik atau drag & drop file di sini</p>
+              <p className="text-sm text-[--text-muted]">{t('edit.dropHint')}</p>
               <p className="text-xs text-[--text-muted] mt-1">
-                Gambar · Video (MP4/MOV) · Dokumen (PDF/DOCX) · Sisa {remaining} slot
+                {t('edit.dropTypes', { remaining })}
               </p>
             </div>
 
@@ -858,14 +620,14 @@ export default function UserEditPage() {
                   {uploading ? (
                     <>
                       <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block" />
-                      Mengupload...
+                      {t('common.uploading')}
                     </>
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                       </svg>
-                      Upload {selectedFiles.length} File
+                      {t('edit.uploadBtn', { count: selectedFiles.length })}
                     </>
                   )}
                 </button>
@@ -877,21 +639,10 @@ export default function UserEditPage() {
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            Batas maksimal {fileData.max_images} file tercapai. Hapus beberapa file untuk upload yang baru.
+            {t('edit.maxReached', { max: fileData.max_images })}
           </div>
         )}
       </div>
     </div>
   );
-}
-
-function parseFulfillment(raw: string | string[] | null): string[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
 }

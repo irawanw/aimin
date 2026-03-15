@@ -6,9 +6,9 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { PRODUCTS_TEMP_DIR, type ParsedTempFile, type ColumnMapping } from '@/lib/products-types';
+import { LLM } from '@/lib/llm';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-const VLLM_API_URL = process.env.VLLM_API_URL || 'http://localhost:8000/v1/chat/completions';
 
 function getPelangganJid(): string | null {
   const cookieStore = cookies();
@@ -52,14 +52,16 @@ Rules:
 - Every column must appear exactly once (either mapped to a field or in specs or ignored)`;
 
   try {
-    const res = await fetch(VLLM_API_URL, {
+    const res = await fetch(LLM.chatUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'default',
+        model: LLM.model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.05,
         max_tokens: 600,
+        stream: false,
+        chat_template_kwargs: { enable_thinking: false },
       }),
     });
     const data = await res.json();

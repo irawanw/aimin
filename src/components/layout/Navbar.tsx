@@ -98,7 +98,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/login"
+                href="/user"
                 className="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300"
                 style={scrolled
                   ? { background: '#2EE6C9', color: '#070b14' }
@@ -186,7 +186,7 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/login"
+                href="/user"
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center px-8 py-3 rounded-full text-sm font-semibold text-[#070b14]"
                 style={{ background: '#2EE6C9' }}

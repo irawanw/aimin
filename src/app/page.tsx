@@ -104,7 +104,7 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               className="font-display font-bold text-white leading-[1.0] tracking-tight"
-              style={{ fontSize: 'clamp(48px, 7vw, 88px)', textShadow: '0 2px 40px rgba(0,0,0,0.4)' }}
+              style={{ fontSize: 'clamp(48px, 7vw, 70px)', textShadow: '0 2px 40px rgba(0,0,0,0.4)' }}
             >
               {p.hero1}
               <br />

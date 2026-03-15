@@ -28,8 +28,8 @@ function getUploadsDir(): string {
 
 async function getStoreFolder(jid: string): Promise<string> {
   const [rows] = await pool.execute(
-    'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-    [jid]
+    'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+    [jid, jid]
   );
   const data = (rows as any[])[0];
   return data?.store_folder || jid.replace('@s.whatsapp.net', '').replace(/[^a-zA-Z0-9]/g, '');
@@ -79,8 +79,8 @@ export async function POST(req: Request) {
 
     // Update store_website_others.hero_video_url
     const [rows] = await pool.execute(
-      'SELECT store_website_others, store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_website_others, store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
     const store = (rows as any[])[0];
     if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });
@@ -118,8 +118,8 @@ export async function DELETE() {
     }
 
     const [rows] = await pool.execute(
-      'SELECT store_website_others, store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_website_others, store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
     const store = (rows as any[])[0];
     if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });

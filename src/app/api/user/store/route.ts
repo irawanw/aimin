@@ -1,25 +1,69 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 import pool from '@/lib/db';
 import { revalidateClient } from '@/lib/revalidate-client';
+import { getPelangganAuthKey, getStoreByKey, pushBotConfig } from '@/lib/pelanggan-auth';
 import fs from 'fs';
 import path from 'path';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-const COOKIE_NAME = 'pelanggan_token';
 const ALLOWED_EXTENSIONS = ['jpg', 'png', 'gif', 'webp'];
 
-function getPelangganJid(): string | null {
-  const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  try {
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    return payload.jid || null;
-  } catch {
-    return null;
+// ─── Extract product list from KB text via LLM parser API ────────────────────
+// Calls the KB parser at KB_FORMATTER_URL/parse-products which uses an LLM
+// to extract structured product data from any KB format.
+// Falls back to regex-based extraction if the API is unavailable.
+// Products are tagged source:'kb' so they can be refreshed independently of
+// manually-created product entries.
+async function extractProductsFromKB(kbText: string): Promise<{ folder: string; name: string; source: 'kb'; [key: string]: unknown }[]> {
+  const kbFormatterUrl = process.env.KB_FORMATTER_URL;
+
+  if (kbFormatterUrl) {
+    try {
+      const res = await fetch(`${kbFormatterUrl}/parse-products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: kbText }),
+        signal: AbortSignal.timeout(20000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const apiProducts = data.products;
+        if (Array.isArray(apiProducts) && apiProducts.length > 0) {
+          // Store API response as-is, just inject source:'kb'
+          return apiProducts.map((p: Record<string, unknown>) => ({ ...p, source: 'kb' as const })) as { folder: string; name: string; source: 'kb'; [key: string]: unknown }[];
+        }
+      }
+    } catch {
+      // Fall through to regex fallback
+    }
   }
+
+  // ── Regex fallback: handles newline-separated AND comma-separated products ──
+  // e.g. "Burger - Rp 25.000, Pizza - Rp 30.000" on one line
+  const PRODUCT_RE = /(?:\d+[\.\)]\s*)?(?:[*•-]\s*)?(.+?)\s*[-–]\s*Rp\s*[\d.,]+/gi;
+  const products: { folder: string; name: string; source: 'kb' }[] = [];
+  const seen = new Set<string>();
+
+  for (const line of kbText.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('==') || trimmed.startsWith('#')) continue;
+
+    // Split by ", " to handle comma-separated product lists on one line
+    const segments = trimmed.split(/,\s*/);
+    for (const seg of segments) {
+      const match = seg.match(PRODUCT_RE);
+      if (!match) continue;
+      const inner = seg.match(/(?:\d+[\.\)]\s*)?(?:[*•-]\s*)?(.+?)\s*[-–]\s*Rp\s*[\d.,]+/i);
+      if (!inner) continue;
+      const name = inner[1].replace(/^\d+[\.\)]\s*/, '').replace(/^[*•-]\s*/, '').trim();
+      if (name.length < 2 || name.length > 80 || name.split(/\s+/).length > 7) continue;
+      const folder = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '_').slice(0, 50);
+      if (folder && !seen.has(folder)) {
+        seen.add(folder);
+        products.push({ folder, name, source: 'kb' });
+      }
+    }
+  }
+  return products;
 }
 
 function getUploadsDir(): string {
@@ -39,7 +83,7 @@ function detectExtension(base64: string): { extension: string; data: string } {
 }
 
 export async function GET() {
-  const jid = getPelangganJid();
+  const jid = getPelangganAuthKey();
   if (!jid) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
@@ -58,6 +102,11 @@ export async function GET() {
     } catch {}
     try {
       await pool.execute(
+        `ALTER TABLE pelanggan ADD COLUMN IF NOT EXISTS dashboard_language VARCHAR(10) DEFAULT 'en'`
+      );
+    } catch {}
+    try {
+      await pool.execute(
         `ALTER TABLE paket ADD COLUMN IF NOT EXISTS pkt_product_num INT DEFAULT 5`
       );
     } catch {}
@@ -65,7 +114,7 @@ export async function GET() {
     const [rows] = await pool.execute(
       `SELECT p.store_whatsapp_jid, p.store_name, p.store_admin, p.store_address,
               p.store_tagline, p.store_feature, p.store_knowledge_base, p.store_images,
-              p.store_status, p.store_type, p.store_fulfillment, p.store_folder, p.store_paket, p.store_expired_at,
+              p.store_status, p.store_type, p.store_fulfillment, p.store_checkout_fields, p.store_folder, p.store_paket, p.store_expired_at,
               p.store_products, p.store_admin_number, p.store_bot_always_on, p.store_email, p.store_whatsapp_bot, p.store_updated_at,
               p.store_id, p.store_subdomain, p.store_design_type, p.store_site_type,
               p.store_theme_primary, p.store_theme_background, p.store_hero_title, p.store_hero_subtitle,
@@ -73,13 +122,15 @@ export async function GET() {
               p.store_latitude, p.store_longitude, p.store_website_others,
               IFNULL(p.store_onboarding_done, 0) AS store_onboarding_done,
               IFNULL(p.store_language, 'id') AS store_language,
+              IFNULL(p.dashboard_language, 'en') AS dashboard_language,
               COALESCE(pk.pkt_pict_num, 5) AS plan_max_images,
               COALESCE(pk.pkt_kb_length, 500) AS plan_max_kb,
               COALESCE(pk.pkt_product_num, 5) AS plan_max_products
        FROM pelanggan p
        LEFT JOIN paket pk ON p.store_paket = pk.pkt_id
-       WHERE p.store_whatsapp_jid = ?`,
-      [jid]
+       WHERE p.store_whatsapp_jid = ? OR p.store_folder = ?
+       LIMIT 1`,
+      [jid, jid]
     );
 
     const data = rows as any[];
@@ -94,7 +145,7 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
-  const jid = getPelangganJid();
+  const jid = getPelangganAuthKey();
   if (!jid) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
@@ -111,7 +162,7 @@ export async function PUT(req: Request) {
       'store_theme_primary', 'store_theme_background', 'store_hero_title', 'store_hero_subtitle',
       'store_hero_image_keyword', 'store_hero_image', 'store_about_us',
       'store_latitude', 'store_longitude', 'store_website_others',
-      'store_language',
+      'store_language', 'dashboard_language', 'store_checkout_fields',
     ];
 
     const updates: string[] = [];
@@ -143,11 +194,7 @@ export async function PUT(req: Request) {
 
     // Handle hero image upload
     if (body.hero_image_base64) {
-      const [storeRows] = await pool.execute(
-        'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-        [jid]
-      );
-      const storeData = (storeRows as any[])[0];
+      const storeData = await getStoreByKey(jid);
       const folder = storeData?.store_folder || jid.replace('@s.whatsapp.net', '').replace(/[^a-zA-Z0-9]/g, '');
       const uploadsDir = getUploadsDir();
       const folderDir = path.join(uploadsDir, folder);
@@ -183,11 +230,7 @@ export async function PUT(req: Request) {
       values.push(heroImageUrl);
     } else if (body.remove_hero_image) {
       // Remove hero image
-      const [storeRows] = await pool.execute(
-        'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-        [jid]
-      );
-      const storeData = (storeRows as any[])[0];
+      const storeData = await getStoreByKey(jid);
       const folder = storeData?.store_folder || jid.replace('@s.whatsapp.net', '').replace(/[^a-zA-Z0-9]/g, '');
       const uploadsDir = getUploadsDir();
       const folderDir = path.join(uploadsDir, folder);
@@ -204,21 +247,18 @@ export async function PUT(req: Request) {
     }
 
     updates.push('store_updated_at = NOW()');
-    values.push(jid);
+    values.push(jid, jid);
 
     await pool.execute(
-      `UPDATE pelanggan SET ${updates.join(', ')} WHERE store_whatsapp_jid = ?`,
+      `UPDATE pelanggan SET ${updates.join(', ')} WHERE store_whatsapp_jid = ? OR store_folder = ?`,
       values
     );
 
-    // Invalidate client-side cache so changes appear instantly
-    const [storeRows] = await pool.execute(
-      'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
-    );
-    const store = (storeRows as any[])[0];
+    // Fetch full store record for cache invalidation + bot config push
+    const store = await getStoreByKey(jid);
     if (store) {
       revalidateClient({ subdomain: store.store_subdomain, storeId: store.store_id });
+      pushBotConfig(store); // fire-and-forget: push to folder (WebChat) + WA JID (if paired)
     }
 
     // Fire-and-forget: rebuild RAG index if knowledge base was updated

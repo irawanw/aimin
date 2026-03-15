@@ -7,7 +7,13 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const [rows] = await pool.execute('SELECT * FROM pelanggan ORDER BY store_updated_at DESC');
+    const [rows] = await pool.execute(
+      `SELECT store_whatsapp_jid, store_name, store_admin, store_address,
+              store_tagline, store_status, store_type, store_folder,
+              store_paket, store_expired_at, store_admin_number,
+              store_bot_always_on, store_special_prompts, store_updated_at
+       FROM pelanggan ORDER BY store_updated_at DESC`
+    );
     return NextResponse.json(rows);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

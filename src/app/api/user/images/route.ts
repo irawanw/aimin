@@ -94,8 +94,8 @@ async function getStoreData(jid: string) {
             COALESCE(pk.pkt_pict_num, 5) as max_images
      FROM pelanggan p
      LEFT JOIN paket pk ON p.store_paket = pk.pkt_id
-     WHERE p.store_whatsapp_jid = ?`,
-    [jid]
+     WHERE p.store_whatsapp_jid = ? OR p.store_folder = ?`,
+    [jid, jid]
   );
   const data = rows as any[];
   return data.length > 0 ? data[0] : null;
@@ -103,8 +103,8 @@ async function getStoreData(jid: string) {
 
 async function updateStoreFiles(jid: string, files: FileEntry[]) {
   await pool.execute(
-    'UPDATE pelanggan SET store_images = ? WHERE store_whatsapp_jid = ?',
-    [JSON.stringify(files), jid]
+    'UPDATE pelanggan SET store_images = ? WHERE store_whatsapp_jid = ? OR store_folder = ?',
+    [JSON.stringify(files), jid, jid]
   );
 }
 

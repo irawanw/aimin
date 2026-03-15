@@ -183,8 +183,8 @@ export async function POST(req: Request) {
 
         // Get store folder
         const [storeRows] = await pool.execute(
-          'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-          [jid]
+          'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+          [jid, jid]
         );
         const storeData = (storeRows as any[])[0];
         if (!storeData) { send('error', { message: 'Toko tidak ditemukan' }); controller.close(); return; }

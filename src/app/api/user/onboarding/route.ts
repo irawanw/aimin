@@ -7,6 +7,51 @@ import { revalidateClient } from '@/lib/revalidate-client';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const COOKIE_NAME = 'pelanggan_token';
 
+async function extractProductsFromKB(kbText: string): Promise<{ folder: string; name: string; source: 'kb'; [key: string]: unknown }[]> {
+  const kbFormatterUrl = process.env.KB_FORMATTER_URL;
+
+  if (kbFormatterUrl) {
+    try {
+      const res = await fetch(`${kbFormatterUrl}/parse-products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: kbText }),
+        signal: AbortSignal.timeout(20000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const apiProducts = data.products;
+        if (Array.isArray(apiProducts) && apiProducts.length > 0) {
+          return apiProducts.map((p: Record<string, unknown>) => ({ ...p, source: 'kb' as const })) as { folder: string; name: string; source: 'kb'; [key: string]: unknown }[];
+        }
+      }
+    } catch {
+      // Fall through to regex fallback
+    }
+  }
+
+  // ── Regex fallback: handles newline-separated AND comma-separated products ──
+  const products: { folder: string; name: string; source: 'kb' }[] = [];
+  const seen = new Set<string>();
+  for (const line of kbText.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('==') || trimmed.startsWith('#')) continue;
+    const segments = trimmed.split(/,\s*/);
+    for (const seg of segments) {
+      const inner = seg.match(/(?:\d+[\.\)]\s*)?(?:[*•-]\s*)?(.+?)\s*[-–]\s*Rp\s*[\d.,]+/i);
+      if (!inner) continue;
+      const name = inner[1].replace(/^\d+[\.\)]\s*/, '').replace(/^[*•-]\s*/, '').trim();
+      if (name.length < 2 || name.length > 80 || name.split(/\s+/).length > 7) continue;
+      const folder = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '_').slice(0, 50);
+      if (folder && !seen.has(folder)) {
+        seen.add(folder);
+        products.push({ folder, name, source: 'kb' });
+      }
+    }
+  }
+  return products;
+}
+
 function getPelangganJid(): string | null {
   const cookieStore = cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
@@ -119,8 +164,8 @@ export async function GET() {
     await ensureSchema();
 
     const [storeRows] = await pool.execute(
-      'SELECT store_onboarding_done FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_onboarding_done FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
 
     const store = (storeRows as any[])[0];
@@ -185,13 +230,52 @@ export async function POST(req: Request) {
       values
     );
 
-    // Invalidate client cache
+    // Invalidate client cache + extract products + fire correct RAG
     const [storeRows] = await pool.execute(
-      'SELECT store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_id, store_subdomain, store_folder, store_knowledge_base, store_type, store_products FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
     const store = (storeRows as any[])[0];
-    if (store) revalidateClient({ subdomain: store.store_subdomain, storeId: store.store_id });
+    if (store) {
+      revalidateClient({ subdomain: store.store_subdomain, storeId: store.store_id });
+
+      const ragUrl = process.env.RAG_SERVICE_URL || 'http://127.0.0.1:8002';
+      const kbText: string = store.store_knowledge_base || '';
+      const isProductCatalog = !!body.is_product_catalog;
+      const storeIsStore = store.store_type === 'store';
+
+      // Extract products from KB and save to store_products
+      if (kbText.trim()) {
+        const kbProducts = await extractProductsFromKB(kbText);
+        if (kbProducts.length > 0) {
+          const existing: any[] = store.store_products ? JSON.parse(store.store_products) : [];
+          const manual = existing.filter((p: any) => p.source !== 'kb');
+          const merged = [...manual, ...kbProducts];
+          await pool.execute(
+            'UPDATE pelanggan SET store_products = ? WHERE store_whatsapp_jid = ? OR store_folder = ?',
+            [JSON.stringify(merged), jid, jid]
+          );
+        }
+      }
+
+      if (store.store_folder && kbText.length >= 2000) {
+        if (isProductCatalog && storeIsStore) {
+          // Product catalog file → index into product RAG (aimin_products)
+          fetch(`${ragUrl}/products/index`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folder: store.store_folder, text: kbText }),
+          }).catch(() => {});
+        } else {
+          // Brochure / menu / services → index into KB RAG (aimin_kb)
+          fetch(`${ragUrl}/index`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folder: store.store_folder, text: kbText }),
+          }).catch(() => {});
+        }
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (e: any) {

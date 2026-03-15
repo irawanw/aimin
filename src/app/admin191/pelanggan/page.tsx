@@ -55,9 +55,11 @@ export default function PelangganPage() {
     setTokenResult(data.token || data.error);
   };
 
+  const pelangganKey = (p: any) => p.store_whatsapp_jid || p.store_folder;
+
   const openEdit = (row: any) => {
     setForm({ ...row });
-    setSelected(row.store_whatsapp_jid);
+    setSelected(pelangganKey(row));
     setModal('edit');
   };
 
@@ -115,7 +117,7 @@ export default function PelangganPage() {
               </thead>
               <tbody className="divide-y divide-[--border]">
                 {filtered.map((p: any) => (
-                  <tr key={p.store_whatsapp_jid} className="hover:bg-[--surface-3]/50 transition-colors">
+                  <tr key={pelangganKey(p)} className="hover:bg-[--surface-3]/50 transition-colors">
                     <td className="px-4 py-3 text-[--text-secondary] font-medium">{p.store_name}</td>
                     <td className="hidden md:table-cell px-4 py-3 text-[--text-muted] font-mono text-xs">{p.store_whatsapp_jid}</td>
                     <td className="hidden lg:table-cell px-4 py-3 text-[--text-muted]">{p.store_admin}</td>
@@ -131,9 +133,9 @@ export default function PelangganPage() {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
                         <button onClick={() => openEdit(p)} className="text-xs text-mint-400 hover:text-mint-300 hover:underline">Edit</button>
-                        <button onClick={() => { setSelected(p.store_whatsapp_jid); setPassword(''); setModal('password'); }} className="text-xs text-yellow-400 hover:text-yellow-300 hover:underline">Pass</button>
-                        <button onClick={() => { setSelected(p.store_whatsapp_jid); setTokenResult(''); setModal('token'); }} className="text-xs text-[--text-muted] hover:text-[--text-secondary] hover:underline">Token</button>
-                        <button onClick={() => handleDelete(p.store_whatsapp_jid)} className="text-xs text-red-400 hover:text-red-300 hover:underline">Hapus</button>
+                        <button onClick={() => { setSelected(pelangganKey(p)); setPassword(''); setModal('password'); }} className="text-xs text-yellow-400 hover:text-yellow-300 hover:underline">Pass</button>
+                        <button onClick={() => { setSelected(pelangganKey(p)); setTokenResult(''); setModal('token'); }} className="text-xs text-[--text-muted] hover:text-[--text-secondary] hover:underline">Token</button>
+                        <button onClick={() => handleDelete(pelangganKey(p))} className="text-xs text-red-400 hover:text-red-300 hover:underline">Hapus</button>
                       </div>
                     </td>
                   </tr>

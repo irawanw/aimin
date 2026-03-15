@@ -3,6 +3,12 @@ import './globals.css';
 import { I18nProvider } from '@/lib/i18n-context';
 import { UserProvider } from '@/lib/user-context';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export const metadata: Metadata = {
   title: 'Aimin – AI-Powered Business Automation',
   description: 'Transform your WhatsApp business with intelligent AI chat assistants, automation engines, and real-time analytics.',

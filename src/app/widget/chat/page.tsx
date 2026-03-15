@@ -7,19 +7,46 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   images?: string[];
+  qrData?: { qrImage: string; pairingPhone: string };
 }
 
-/* ── Text formatter: **bold** + newlines ── */
+/* ── Text formatter: WhatsApp-style markup ── */
+const TOKEN_RE = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*|_[^_\n]+_|~[^~\n]+~|`[^`\n]+`)/g;
+
+function formatSegment(seg: string, key: number): ReactNode {
+  if (seg.startsWith('**') && seg.endsWith('**') && seg.length > 4)
+    return <strong key={key}>{seg.slice(2, -2)}</strong>;
+  if (seg.startsWith('*') && seg.endsWith('*') && seg.length > 2)
+    return <strong key={key}>{seg.slice(1, -1)}</strong>;
+  if (seg.startsWith('_') && seg.endsWith('_') && seg.length > 2)
+    return <em key={key}>{seg.slice(1, -1)}</em>;
+  if (seg.startsWith('~') && seg.endsWith('~') && seg.length > 2)
+    return <s key={key}>{seg.slice(1, -1)}</s>;
+  if (seg.startsWith('`') && seg.endsWith('`') && seg.length > 2)
+    return <code key={key} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 3, padding: '0 4px', fontFamily: 'monospace', fontSize: '0.85em' }}>{seg.slice(1, -1)}</code>;
+  return seg;
+}
+
+function formatLine(line: string, key: number): ReactNode {
+  // List items: "- text" or "• text"
+  const listMatch = line.match(/^[-•]\s+(.+)/);
+  if (listMatch) {
+    return (
+      <div key={key} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+        <span style={{ flexShrink: 0, marginTop: 1 }}>•</span>
+        <span>{listMatch[1].split(TOKEN_RE).map((s, j) => formatSegment(s, j))}</span>
+      </div>
+    );
+  }
+  return <span key={key}>{line.split(TOKEN_RE).map((s, j) => formatSegment(s, j))}</span>;
+}
+
 function formatMessage(text: string): ReactNode {
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <Fragment key={i}>
       {i > 0 && <br />}
-      {line.split(/(\*\*.*?\*\*)/).map((seg, j) =>
-        seg.startsWith('**') && seg.endsWith('**')
-          ? <strong key={j}>{seg.slice(2, -2)}</strong>
-          : seg
-      )}
+      {formatLine(line, i)}
     </Fragment>
   ));
 }
@@ -146,6 +173,81 @@ function TypingIndicator({ color }: { color: string }) {
   );
 }
 
+/* ── QR Code bubble with live polling ── */
+function QRBubble({ initialQrImage, pairingPhone, replyText }: {
+  initialQrImage: string;
+  pairingPhone: string;
+  replyText: string;
+}) {
+  const [qrImage, setQrImage] = useState(initialQrImage);
+  const [status, setStatus] = useState<'pending' | 'success' | 'failed'>('pending');
+  const [statusMsg, setStatusMsg] = useState('Menunggu scan...');
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    intervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/trial/status/${pairingPhone}`);
+        const data = await res.json();
+        if (data.qrImage) setQrImage(data.qrImage);
+        if (data.status === 'success') {
+          clearInterval(intervalRef.current!);
+          setStatus('success');
+          setStatusMsg(data.message || 'WhatsApp berhasil terhubung!');
+        } else if (data.status === 'failed') {
+          clearInterval(intervalRef.current!);
+          setStatus('failed');
+          setStatusMsg(data.message || 'Gagal terhubung. Coba lagi.');
+        }
+      } catch { /* ignore network errors, keep polling */ }
+    }, 5000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [pairingPhone]);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+      <div style={{
+        padding: '10px 12px',
+        borderRadius: '16px 16px 16px 4px',
+        background: '#1e293b',
+        color: 'white',
+        fontSize: 13,
+        lineHeight: 1.55,
+        maxWidth: '82%',
+      }}>
+        {replyText}
+        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          {status !== 'success' && (
+            <div style={{ background: 'white', padding: 6, borderRadius: 8, lineHeight: 0 }}>
+              <img
+                src={qrImage}
+                alt="QR WhatsApp"
+                width={200}
+                height={200}
+                style={{ display: 'block', borderRadius: 4 }}
+              />
+            </div>
+          )}
+          <div style={{
+            fontSize: 12,
+            color: status === 'success' ? '#4ade80' : status === 'failed' ? '#f87171' : '#94a3b8',
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            {status === 'pending' && (
+              <span style={{
+                display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
+                background: '#94a3b8', animation: 'pulse 1.5s infinite',
+              }} />
+            )}
+            {status === 'success' ? '✅ ' : status === 'failed' ? '❌ ' : ''}{statusMsg}
+          </div>
+        </div>
+        <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }`}</style>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main chat content ── */
 function WidgetChatContent() {
   const searchParams = useSearchParams();
@@ -155,25 +257,44 @@ function WidgetChatContent() {
   const [storeName, setStoreName] = useState('Chat');
   const [primaryColor, setPrimaryColor] = useState('#6366f1');
   const [storeFolder, setStoreFolder] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Halo! Ada yang bisa saya bantu?' },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const cancelFollowUpRef = useRef(false);
 
+  const greetingForLang = (lang: string): string => {
+    switch (lang) {
+      case 'fr': return 'Bonjour ! Comment puis-je vous aider ?';
+      case 'en': return 'Hello! How can I help you?';
+      case 'ar': return 'مرحباً! كيف يمكنني مساعدتك؟';
+      case 'zh': return '你好！有什么可以帮您的吗？';
+      case 'ja': return 'こんにちは！何かお手伝いできますか？';
+      case 'ko': return '안녕하세요! 무엇을 도와드릴까요?';
+      case 'es': return '¡Hola! ¿En qué puedo ayudarte?';
+      case 'pt': return 'Olá! Como posso ajudá-lo?';
+      case 'de': return 'Hallo! Wie kann ich Ihnen helfen?';
+      default:   return 'Halo! Ada yang bisa saya bantu?'; // id
+    }
+  };
+
   useEffect(() => {
-    if (!store) return;
+    if (!store) {
+      setMessages([{ role: 'assistant', content: greetingForLang('id') }]);
+      return;
+    }
     fetch('/api/widget/config?store=' + encodeURIComponent(store))
       .then((r) => r.json())
       .then((data) => {
         if (data?.storeName) setStoreName(data.storeName);
         if (data?.primaryColor) setPrimaryColor(data.primaryColor);
         if (data?.storeFolder) setStoreFolder(data.storeFolder);
+        setMessages([{ role: 'assistant', content: greetingForLang(data?.language || 'id') }]);
       })
-      .catch(() => {});
+      .catch(() => {
+        setMessages([{ role: 'assistant', content: greetingForLang('id') }]);
+      });
   }, [store]);
 
   useEffect(() => {
@@ -194,9 +315,22 @@ function WidgetChatContent() {
       const res = await fetch('/api/widget/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, sessionId, storeFolder }),
+        body: JSON.stringify({ message: text, sessionId, storeFolder, store }),
       });
       const data = await res.json();
+
+      // QR pairing flow
+      if (data.isQR && data.qrImage && data.pairingPhone) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: data.replyText || 'Scan QR code ini dengan WhatsApp kamu.',
+            qrData: { qrImage: data.qrImage, pairingPhone: data.pairingPhone },
+          },
+        ]);
+        return;
+      }
 
       const responseImages: string[] = Array.isArray(data.images) && data.images.length > 0 ? data.images : [];
 
@@ -255,11 +389,21 @@ function WidgetChatContent() {
   const closeLightbox = useCallback(() => setLightbox(null), []);
 
   return (
+    <>
+      <style>{`
+        html, body { margin: 0; padding: 0; height: 100%; background: #0a0f1e; }
+        .chat-root { height: 100vh; height: 100dvh; }
+        @supports (height: 100dvh) { .chat-root { height: 100dvh; } }
+      `}</style>
+    <div className="chat-root" style={{ background: '#0a0f1e', display: 'flex', alignItems: 'stretch', justifyContent: 'center' }}>
     <div
       style={{
-        display: 'flex', flexDirection: 'column', height: '100vh',
+        display: 'flex', flexDirection: 'column',
+        height: '100%',
+        width: '100%', maxWidth: 480,
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         background: '#0f172a', color: '#f1f5f9', overflow: 'hidden',
+        boxShadow: '0 0 40px rgba(0,0,0,0.5)',
       }}
     >
       {/* Header */}
@@ -289,6 +433,14 @@ function WidgetChatContent() {
       >
         {messages.map((msg, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+            {/* QR pairing bubble */}
+            {msg.qrData ? (
+              <QRBubble
+                initialQrImage={msg.qrData.qrImage}
+                pairingPhone={msg.qrData.pairingPhone}
+                replyText={msg.content}
+              />
+            ) : (
             <div
               style={{
                 maxWidth: '82%',
@@ -332,6 +484,7 @@ function WidgetChatContent() {
                 </div>
               )}
             </div>
+            )}
           </div>
         ))}
 
@@ -393,6 +546,8 @@ function WidgetChatContent() {
         <Lightbox images={lightbox.images} startIndex={lightbox.index} onClose={closeLightbox} />
       )}
     </div>
+    </div>
+    </>
   );
 }
 

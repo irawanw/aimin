@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import UpgradeGate from '@/components/user/UpgradeGate';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface GalleryItem {
   id: number;
@@ -19,6 +20,7 @@ export default function GalleryPage() {
 }
 
 function GalleryContent() {
+  const { t } = useLanguage();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,11 +38,11 @@ function GalleryContent() {
       if (data.items) setItems(data.items);
       else if (data.error) setError(data.error);
     } catch {
-      setError('Gagal memuat gallery');
+      setError(t('gallery.errorLoad'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchGallery();
@@ -49,8 +51,8 @@ function GalleryContent() {
   // Clear error after 4s
   useEffect(() => {
     if (error) {
-      const t = setTimeout(() => setError(''), 4000);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setError(''), 4000);
+      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -92,10 +94,10 @@ function GalleryContent() {
         }
         closeModal();
       } else {
-        setError(data.error || 'Gagal menyimpan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     } finally {
       setSaving(false);
     }
@@ -110,10 +112,10 @@ function GalleryContent() {
         setItems(items.filter(item => item.id !== deleteConfirm));
         setDeleteConfirm(null);
       } else {
-        setError('Gagal menghapus item');
+        setError(t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
   };
 
@@ -162,7 +164,7 @@ function GalleryContent() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-[--text-primary]">Gallery</h2>
+          <h2 className="text-xl font-semibold text-[--text-primary]">{t('gallery.title')}</h2>
           {items.length > 0 && (
             <span className="text-xs bg-mint-500/20 text-mint-400 px-2 py-0.5 rounded-full font-medium">
               {items.length}
@@ -176,19 +178,19 @@ function GalleryContent() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Item
+          {t('gallery.addBtn')}
         </button>
       </div>
 
       {/* Items */}
       {items.length === 0 ? (
         <div className="glass-dark rounded-2xl p-12 text-center">
-          <p className="text-[--text-muted]">Belum ada item di gallery.</p>
+          <p className="text-[--text-muted]">{t('gallery.empty')}</p>
           <button
             onClick={() => openModal()}
             className="mt-4 text-mint-400 hover:text-mint-300 font-medium"
           >
-            + Tambah Item Pertama
+            {t('gallery.emptyBtn')}
           </button>
         </div>
       ) : (
@@ -222,13 +224,13 @@ function GalleryContent() {
                     onClick={() => openModal(item)}
                     className="flex-1 px-3 py-1.5 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] text-xs rounded-lg transition-colors"
                   >
-                    Edit
+                    {t('common.edit')}
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(item.id)}
                     className="flex-1 px-3 py-1.5 bg-red-900/50 hover:bg-red-900/70 text-red-300 text-xs rounded-lg transition-colors"
                   >
-                    Hapus
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -254,11 +256,11 @@ function GalleryContent() {
               className="glass-dark rounded-2xl p-6 w-full max-w-md"
             >
               <h2 className="text-base font-semibold text-[--text-primary] mb-5">
-                {editingItem ? 'Edit Item' : 'Tambah Item'}
+                {editingItem ? t('gallery.editTitle') : t('gallery.addTitle')}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="form-label">Gambar</label>
+                  <label className="form-label">{t('gallery.imageLabel')}</label>
                   {form.image_url ? (
                     <div className="relative">
                       <img
@@ -280,28 +282,28 @@ function GalleryContent() {
                       <svg className="w-8 h-8 text-[--text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-xs text-[--text-muted]">Klik untuk pilih gambar</span>
+                      <span className="text-xs text-[--text-muted]">{t('gallery.imagePlaceholder')}</span>
                       <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                     </label>
                   )}
                 </div>
                 <div>
-                  <label className="form-label">Judul <span className="text-red-400">*</span></label>
+                  <label className="form-label">{t('gallery.titleLabel')} <span className="text-red-400">*</span></label>
                   <input
                     type="text"
                     required
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="Nama item"
+                    placeholder={t('gallery.titlePlaceholder')}
                     className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="form-label">Deskripsi</label>
+                  <label className="form-label">{t('gallery.descLabel')}</label>
                   <textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    placeholder="Deskripsi singkat"
+                    placeholder={t('gallery.descPlaceholder')}
                     rows={3}
                     className="form-textarea"
                   />
@@ -312,14 +314,14 @@ function GalleryContent() {
                     onClick={closeModal}
                     className="flex-1 px-4 py-2 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] rounded-lg transition-colors"
                   >
-                    Batal
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={saving || !form.title.trim()}
                     className="flex-1 px-4 py-2 bg-mint-600 hover:bg-mint-500 disabled:opacity-50 disabled:hover:bg-mint-600 text-white rounded-lg transition-colors font-medium"
                   >
-                    {saving ? 'Menyimpan...' : 'Simpan'}
+                    {saving ? t('common.saving') : t('common.save')}
                   </button>
                 </div>
               </form>
@@ -344,20 +346,20 @@ function GalleryContent() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="glass-dark rounded-2xl p-6 w-full max-w-sm"
             >
-              <h2 className="text-base font-semibold text-[--text-primary] mb-2">Hapus Item?</h2>
-              <p className="text-[--text-muted] mb-6">Apakah Anda yakin ingin menghapus item ini?</p>
+              <h2 className="text-base font-semibold text-[--text-primary] mb-2">{t('gallery.deleteConfirm')}</h2>
+              <p className="text-[--text-muted] mb-6">{t('gallery.deleteWarning')}</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteConfirm(null)}
                   className="flex-1 px-4 py-2 bg-[--surface-3] hover:bg-[--surface-2] text-[--text-secondary] rounded-lg transition-colors"
                 >
-                  Batal
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                 >
-                  Hapus
+                  {t('common.delete')}
                 </button>
               </div>
             </motion.div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import UpgradeGate from '@/components/user/UpgradeGate';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function WidgetPage() {
   return <UpgradeGate><WidgetContent /></UpgradeGate>;
@@ -10,6 +11,7 @@ export default function WidgetPage() {
 
 function WidgetContent() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -34,11 +36,11 @@ function WidgetContent() {
         setSubdomain(data.subdomain ?? '');
         setLoading(false);
       })
-      .catch(() => { setError('Gagal memuat data'); setLoading(false); });
-  }, [router]);
+      .catch(() => { setError(t('widget.errorLoad')); setLoading(false); });
+  }, [router, t]);
 
   useEffect(() => {
-    if (success) { const t = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(t); }
+    if (success) { const timer = setTimeout(() => setSuccess(''), 4000); return () => clearTimeout(timer); }
   }, [success]);
 
   function handleAddDomain() {
@@ -46,15 +48,15 @@ function WidgetContent() {
     if (!d) return;
     const pattern = /^https?:\/\/[a-zA-Z0-9][a-zA-Z0-9\-._]*(:\d+)?$/;
     if (!pattern.test(d)) {
-      setError('Format domain tidak valid. Gunakan format: https://example.com');
+      setError(t('widget.invalidDomain'));
       return;
     }
     if (domains.includes(d)) {
-      setError('Domain sudah ada dalam daftar');
+      setError(t('widget.duplicateDomain'));
       return;
     }
     if (domains.length >= 20) {
-      setError('Maksimal 20 domain diperbolehkan');
+      setError(t('widget.maxDomains'));
       return;
     }
     setDomains([...domains, d]);
@@ -78,12 +80,12 @@ function WidgetContent() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('Pengaturan widget berhasil disimpan!');
+        setSuccess(t('widget.success'));
       } else {
-        setError(data.error || 'Gagal menyimpan');
+        setError(data.error || t('common.errorLoad'));
       }
     } catch {
-      setError('Gagal menghubungi server');
+      setError(t('common.errorServer'));
     }
     setSaving(false);
   }
@@ -95,7 +97,7 @@ function WidgetContent() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError('Gagal menyalin kode');
+      setError(t('common.errorServer'));
     }
   }
 
@@ -125,12 +127,12 @@ function WidgetContent() {
 
       {/* Enable/Disable Toggle */}
       <div className="page-card p-6">
-        <p className="section-label mb-5">Chat Widget</p>
+        <p className="section-label mb-5">{t('widget.title')}</p>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[--text-primary] text-sm font-medium">Aktifkan Widget Chat</p>
-            <p className="text-[--text-muted] text-xs mt-0.5">Izinkan embed widget chat di website eksternal</p>
+            <p className="text-[--text-primary] text-sm font-medium">{t('widget.enableLabel')}</p>
+            <p className="text-[--text-muted] text-xs mt-0.5">{t('widget.enableDesc')}</p>
           </div>
           <button
             type="button"
@@ -148,14 +150,14 @@ function WidgetContent() {
 
       {/* Allowed Domains */}
       <div className="page-card p-6">
-        <p className="section-label mb-0.5">Domain yang Diizinkan</p>
-        <p className="text-xs text-[--text-muted] mb-4 mt-1">Widget hanya akan muncul di domain-domain ini</p>
+        <p className="section-label mb-0.5">{t('widget.domainsTitle')}</p>
+        <p className="text-xs text-[--text-muted] mb-4 mt-1">{t('widget.domainsHint')}</p>
 
         <div className="flex gap-2 mb-3">
           <input
             type="text"
             className="form-input flex-1"
-            placeholder="https://example.com"
+            placeholder={t('widget.domainPlaceholder')}
             value={newDomain}
             onChange={(e) => setNewDomain(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddDomain(); } }}
@@ -165,12 +167,12 @@ function WidgetContent() {
             onClick={handleAddDomain}
             className="px-4 py-2.5 rounded-xl bg-mint-600 hover:bg-mint-700 text-white text-sm font-medium transition-colors whitespace-nowrap"
           >
-            Tambah
+            {t('widget.addBtn')}
           </button>
         </div>
 
         {domains.length === 0 ? (
-          <p className="text-[--text-muted] text-sm text-center py-4">Belum ada domain yang ditambahkan</p>
+          <p className="text-[--text-muted] text-sm text-center py-4">{t('widget.noDomains')}</p>
         ) : (
           <ul className="space-y-2">
             {domains.map((d) => (
@@ -195,8 +197,8 @@ function WidgetContent() {
       {/* Embed Code */}
       {subdomain && (
         <div className="page-card p-6">
-          <p className="section-label mb-0.5">Kode Embed</p>
-          <p className="text-xs text-[--text-muted] mb-4 mt-1">Tempel kode ini di website eksternal Anda sebelum tag &lt;/body&gt;</p>
+          <p className="section-label mb-0.5">{t('widget.embedTitle')}</p>
+          <p className="text-xs text-[--text-muted] mb-4 mt-1">{t('widget.embedHint')}</p>
 
           <div className="relative">
             <pre className="px-4 py-3 rounded-xl bg-[--surface-1] border border-[--border] text-xs text-green-400 font-mono overflow-x-auto whitespace-pre-wrap break-all">
@@ -212,14 +214,14 @@ function WidgetContent() {
                   <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Tersalin!
+                  {t('common.copied')}
                 </>
               ) : (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
-                  Salin
+                  {t('common.copy')}
                 </>
               )}
             </button>
@@ -235,7 +237,7 @@ function WidgetContent() {
           disabled={saving}
           className="btn-primary text-sm !py-2.5 !px-6"
         >
-          {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+          {saving ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </div>

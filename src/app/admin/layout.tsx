@@ -23,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { t } = useI18n();
 
   useEffect(() => {
-    if (!loading && !user) router.push('/login');
+    if (!loading && !user) router.push('/user');
     if (!loading && user && user.role !== 'admin') router.push('/dashboard');
   }, [user, loading, router]);
 

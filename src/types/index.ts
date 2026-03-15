@@ -30,6 +30,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   files?: ChatFile[];
+  qrData?: { qrImage: string; pairingPhone: string };
 }
 
 export type Locale = 'id' | 'en';

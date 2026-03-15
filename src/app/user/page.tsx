@@ -8,6 +8,7 @@ import {
   MessageSquare, Images, CheckCircle2, Zap,
   Clock, Star, Package, Sparkles, ArrowUpRight,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface StoreData {
   store_whatsapp_jid: string;
@@ -105,6 +106,7 @@ function UserDashboard() {
   const [store, setStore] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { t, lang } = useLanguage();
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -162,7 +164,7 @@ function UserDashboard() {
   }
   if (!store) return null;
 
-  const whatsappNumber = store.store_whatsapp_jid.replace('@s.whatsapp.net', '');
+  const whatsappNumber = store.store_whatsapp_jid?.replace('@s.whatsapp.net', '') || '';
   const isActive = store.store_status === 'AKTIF';
   const isBotOn = !!store.store_bot_always_on;
   const isSmart = (store.plan_max_images ?? 5) >= 20;
@@ -176,18 +178,18 @@ function UserDashboard() {
     : null;
 
   const baseShortcuts: Shortcut[] = [
-    { href: '/user/edit', icon: PenLine, label: 'Edit Toko', desc: 'Info, KB & identitas toko', color: 'bg-mint-500/15 text-mint-400' },
-    { href: '/user/website', icon: Globe, label: 'Website', desc: 'Template & warna', color: 'bg-cyan-500/15 text-cyan-400' },
+    { href: '/user/edit', icon: PenLine, label: t('nav.editStore'), desc: t('home.editStoreDesc'), color: 'bg-mint-500/15 text-mint-400' },
+    { href: '/user/website', icon: Globe, label: t('nav.website'), desc: t('home.websiteDesc'), color: 'bg-cyan-500/15 text-cyan-400' },
   ];
 
   const smartShortcuts: Shortcut[] = [
-    { href: '/user/gallery', icon: Images, label: 'Gallery', desc: 'Upload & kelola foto', color: 'bg-blue-500/15 text-blue-400' },
+    { href: '/user/gallery', icon: Images, label: t('nav.gallery'), desc: t('home.galleryDesc'), color: 'bg-blue-500/15 text-blue-400' },
     isProductStore
-      ? { href: '/user/products', icon: Package, label: 'Katalog Produk', desc: 'Kelola produk', color: 'bg-indigo-500/15 text-indigo-400' }
-      : { href: '/user/services', icon: Briefcase, label: 'Layanan', desc: 'Kelola layanan', color: 'bg-brand-500/15 text-brand-400' },
-    { href: '/user/reviews', icon: Star, label: 'Ulasan', desc: 'Rating & testimoni', color: 'bg-amber-500/15 text-amber-400' },
-    { href: '/user/conversations', icon: BarChart2, label: 'Percakapan', desc: 'Statistik chat bot', color: 'bg-violet-500/15 text-violet-400' },
-    { href: '/user/widget', icon: MessageSquare, label: 'Chat Widget', desc: 'Pasang di website', color: 'bg-purple-500/15 text-purple-400' },
+      ? { href: '/user/products', icon: Package, label: t('nav.productCatalog'), desc: t('home.productCatalogDesc'), color: 'bg-indigo-500/15 text-indigo-400' }
+      : { href: '/user/services', icon: Briefcase, label: t('nav.services'), desc: t('home.servicesDesc'), color: 'bg-brand-500/15 text-brand-400' },
+    { href: '/user/reviews', icon: Star, label: t('nav.reviews'), desc: t('home.reviewsDesc'), color: 'bg-amber-500/15 text-amber-400' },
+    { href: '/user/conversations', icon: BarChart2, label: t('nav.conversations'), desc: t('home.conversationsDesc'), color: 'bg-violet-500/15 text-violet-400' },
+    { href: '/user/widget', icon: MessageSquare, label: t('nav.chatWidget'), desc: t('home.widgetDesc'), color: 'bg-purple-500/15 text-purple-400' },
   ];
 
   const shortcuts = isSmart ? [...baseShortcuts, ...smartShortcuts] : baseShortcuts;
@@ -211,10 +213,10 @@ function UserDashboard() {
                   {store.store_status}
                 </span>
               </div>
-              <p className="text-sm text-[--text-muted] mt-0.5">{store.store_tagline || 'Belum ada tagline'}</p>
+              <p className="text-sm text-[--text-muted] mt-0.5">{store.store_tagline || '—'}</p>
               {expiredLabel && (
                 <p className={`text-xs mt-1 font-medium ${isExpired ? 'text-red-400' : isExpiringSoon ? 'text-amber-400' : 'text-[--text-muted]'}`}>
-                  {isExpired ? '⛔ Expired sejak ' : isExpiringSoon ? '⚠ Aktif hingga ' : 'Aktif hingga '}{expiredLabel}
+                  {isExpired ? t('home.expiredSince') : isExpiringSoon ? t('home.expiringSoon') : t('home.until')}{expiredLabel}
                 </p>
               )}
               <p className="text-xs text-[--text-muted] mt-1 font-mono">+{whatsappNumber}</p>
@@ -225,7 +227,7 @@ function UserDashboard() {
             className="self-start flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg bg-mint-600 hover:bg-mint-500 text-white transition-colors shadow-lg shadow-mint-500/20 whitespace-nowrap"
           >
             <PenLine className="w-3.5 h-3.5" />
-            Edit Toko
+            {t('home.editStore')}
           </a>
         </div>
       </motion.div>
@@ -233,30 +235,30 @@ function UserDashboard() {
       {/* Stat row */}
       <motion.div variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
-          label="Status Toko"
-          value={isExpired ? 'Expired' : isActive ? 'Aktif' : 'Nonaktif'}
-          sub={expiredLabel ? (isExpired ? `Expired ${expiredLabel}` : `s/d ${expiredLabel}`) : undefined}
+          label={t('home.storeStatus')}
+          value={isExpired ? t('common.expired') : isActive ? t('common.active') : t('common.inactive')}
+          sub={expiredLabel ? (isExpired ? `${t('common.expired')} ${expiredLabel}` : `${t('home.until')}${expiredLabel}`) : undefined}
           icon={CheckCircle2}
           accent={isExpired ? 'bg-red-500/15 text-red-400' : isActive ? 'bg-mint-500/15 text-mint-400' : 'bg-red-500/15 text-red-400'}
         />
         <StatCard
-          label="Bot WhatsApp"
-          value={isBotOn ? 'ON' : 'OFF'}
-          sub="always on"
+          label={t('home.botWhatsapp')}
+          value={isBotOn ? t('common.on') : t('common.off')}
+          sub={t('home.alwaysOn')}
           icon={Zap}
           accent={isBotOn ? 'bg-amber-500/15 text-amber-400' : 'bg-[--surface-3] text-[--text-muted]'}
         />
         <StatCard
-          label="Paket"
+          label={t('home.plan')}
           value={isSmart ? 'SMART' : 'BASIC'}
-          sub={isSmart ? 'Semua fitur aktif' : 'Upgrade untuk fitur lengkap'}
+          sub={isSmart ? t('home.smartDesc') : t('home.basicDesc')}
           icon={Sparkles}
           accent={isSmart ? 'bg-violet-500/15 text-violet-400' : 'bg-[--surface-3] text-[--text-muted]'}
         />
         <StatCard
-          label="Terakhir Update"
+          label={t('home.lastUpdate')}
           value={store.store_updated_at
-            ? new Date(store.store_updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+            ? new Date(store.store_updated_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'id-ID', { day: 'numeric', month: 'short' })
             : '-'}
           icon={Clock}
           accent="bg-blue-500/15 text-blue-400"
@@ -265,7 +267,7 @@ function UserDashboard() {
 
       {/* Shortcut grid */}
       <motion.div variants={fadeUp} className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] px-0.5">Menu</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] px-0.5">{t('home.menu')}</p>
         <motion.div variants={stagger} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {shortcuts.map((s) => (
             <ShortcutCard key={s.href} {...s} />
@@ -277,8 +279,8 @@ function UserDashboard() {
       {!isSmart && (
         <motion.div variants={fadeUp} className="rounded-xl bg-gradient-to-br from-violet-500/10 to-mint-500/10 border border-violet-500/20 p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-violet-300">Upgrade ke Paket SMART</p>
-            <p className="text-xs text-[--text-muted] mt-0.5">Buka semua fitur: layanan, ulasan, percakapan, chat widget & lebih</p>
+            <p className="text-sm font-semibold text-violet-300">{t('home.upgradeTitle')}</p>
+            <p className="text-xs text-[--text-muted] mt-0.5">{t('home.upgradeDesc')}</p>
           </div>
           <ArrowUpRight className="w-5 h-5 text-violet-400 flex-shrink-0" />
         </motion.div>

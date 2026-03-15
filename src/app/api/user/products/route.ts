@@ -20,8 +20,8 @@ function getPelangganJid(): string | null {
 
 async function getStoreFolder(jid: string): Promise<string | null> {
   const [rows] = await pool.execute(
-    'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-    [jid]
+    'SELECT store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+    [jid, jid]
   );
   const data = rows as any[];
   return data[0]?.store_folder || null;

@@ -20,8 +20,8 @@ async function getStoreFromToken(token: string) {
   const jid = payload.jid;
 
   const [rows] = await pool.execute(
-    'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-    [jid]
+    'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+    [jid, jid]
   ) as any;
 
   if (!rows || rows.length === 0) {

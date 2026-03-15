@@ -23,8 +23,8 @@ async function getStoreInfo(): Promise<StoreInfo | null> {
     const jid = payload.jid;
     if (!jid) return null;
     const [rows] = await pool.execute(
-      'SELECT store_id, store_subdomain, store_folder, store_name FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_id, store_subdomain, store_folder, store_name FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
     const data = rows as any[];
     return data.length > 0 ? {

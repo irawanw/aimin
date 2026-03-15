@@ -9,18 +9,34 @@ const STORAGE_KEY = 'chat-widget-session';
 const STORAGE_TIMESTAMP_KEY = 'chat-widget-timestamp';
 const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+function formatSegment(seg: string, key: number): ReactNode {
+  // **bold** or *bold*
+  if (seg.startsWith('**') && seg.endsWith('**') && seg.length > 4)
+    return <strong key={key}>{seg.slice(2, -2)}</strong>;
+  if (seg.startsWith('*') && seg.endsWith('*') && seg.length > 2)
+    return <strong key={key}>{seg.slice(1, -1)}</strong>;
+  // _italic_
+  if (seg.startsWith('_') && seg.endsWith('_') && seg.length > 2)
+    return <em key={key}>{seg.slice(1, -1)}</em>;
+  // ~strikethrough~
+  if (seg.startsWith('~') && seg.endsWith('~') && seg.length > 2)
+    return <s key={key}>{seg.slice(1, -1)}</s>;
+  // ```monospace```
+  if (seg.startsWith('```') && seg.endsWith('```') && seg.length > 6)
+    return <code key={key} className="bg-black/10 rounded px-1 font-mono text-[0.85em]">{seg.slice(3, -3)}</code>;
+  // `inline code`
+  if (seg.startsWith('`') && seg.endsWith('`') && seg.length > 2)
+    return <code key={key} className="bg-black/10 rounded px-1 font-mono text-[0.85em]">{seg.slice(1, -1)}</code>;
+  return seg;
+}
+
 function formatMessage(text: string): ReactNode {
+  const TOKEN_RE = /(\*\*[^*\n]+\*\*|\*[^*\n]+\*|_[^_\n]+_|~[^~\n]+~|```[^`]+```|`[^`\n]+`)/g;
   const lines = text.split('\n');
   return lines.map((line, i) => (
     <Fragment key={i}>
       {i > 0 && <br />}
-      {line.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).map((seg, j) => {
-        if (seg.startsWith('**') && seg.endsWith('**') && seg.length > 4)
-          return <strong key={j}>{seg.slice(2, -2)}</strong>;
-        if (seg.startsWith('*') && seg.endsWith('*') && seg.length > 2)
-          return <strong key={j}>{seg.slice(1, -1)}</strong>;
-        return seg;
-      })}
+      {line.split(TOKEN_RE).map((seg, j) => formatSegment(seg, j))}
     </Fragment>
   ));
 }
@@ -286,13 +302,30 @@ export default function ChatWidget() {
         const res = await fetch(`/api/trial/status/${encodeURIComponent(phone)}`);
         if (!res.ok) return; // keep polling on transient errors
         const data = await res.json();
+
+        // Refresh QR image in the last QR message if WA rotated it
+        if (data.qrImage) {
+          setMessages((prev) => {
+            const idx = [...prev].reverse().findIndex((m) => m.qrData);
+            if (idx === -1) return prev;
+            const realIdx = prev.length - 1 - idx;
+            const updated = [...prev];
+            updated[realIdx] = {
+              ...updated[realIdx],
+              qrData: { ...updated[realIdx].qrData!, qrImage: data.qrImage },
+            };
+            return updated;
+          });
+        }
+
         if (data.status === 'success' || data.status === 'failed') {
           clearInterval(pairingPollRef.current!);
           pairingPollRef.current = null;
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: data.message },
-          ]);
+          // Remove qrData from the QR message (hide image) and add status message
+          setMessages((prev) => {
+            const updated = prev.map((m) => m.qrData ? { ...m, qrData: undefined } : m);
+            return [...updated, { role: 'assistant' as const, content: data.message }];
+          });
         }
         // 'pending' → keep polling
       } catch {
@@ -331,15 +364,24 @@ export default function ChatWidget() {
             filename: url.split('/').pop() || 'image',
           })) ?? [];
 
+      // QR pairing flow — show QR image in bubble and start polling
+      if (data.isQR && data.qrImage && data.pairingPhone) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: replyText,
+            qrData: { qrImage: data.qrImage, pairingPhone: data.pairingPhone },
+          },
+        ]);
+        startPairingPoll(data.pairingPhone);
+        return;
+      }
+
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: replyText, files: files.length ? files : undefined },
       ]);
-
-      // Handle trial pairing flow
-      if (data.isPairing && data.pairingPhone) {
-        startPairingPoll(data.pairingPhone);
-      }
     } catch {
       setMessages((prev) => [...prev, { role: 'assistant', content: 'Maaf, terjadi kesalahan. Silakan coba lagi.' }]);
     } finally {
@@ -393,6 +435,24 @@ export default function ChatWidget() {
                   {msg.files && msg.files.length > 0 && (
                     <div className="mt-1.5 space-y-1.5 max-w-[85%]">
                       {msg.files.map((file, fi) => <FileAttachment key={fi} file={file} />)}
+                    </div>
+                  )}
+                  {msg.qrData && (
+                    <div className="mt-2 flex flex-col items-start gap-2">
+                      <div style={{ background: 'white', padding: 6, borderRadius: 8, lineHeight: 0 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={msg.qrData.qrImage}
+                          alt="QR WhatsApp"
+                          width={200}
+                          height={200}
+                          style={{ display: 'block', borderRadius: 4 }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#94a3b8', animation: 'pulse 1.5s infinite' }} />
+                        Menunggu scan...
+                      </span>
                     </div>
                   )}
                 </div>

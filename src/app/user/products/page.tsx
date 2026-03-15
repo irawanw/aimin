@@ -6,6 +6,7 @@ import {
   Trash2, RefreshCw, X, CheckCircle, AlertCircle,
   FileSpreadsheet, Tag, ShoppingCart, BarChart2,
 } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,35 +49,28 @@ interface Product {
 
 type Stage = 'loading' | 'catalog' | 'parsing' | 'mapping' | 'importing' | 'done';
 
-const FIELD_OPTIONS = [
-  { value: 'name', label: 'Nama Produk' },
-  { value: 'sku', label: 'SKU / Kode' },
-  { value: 'category', label: 'Kategori' },
-  { value: 'price', label: 'Harga' },
-  { value: 'price_max', label: 'Harga Maks' },
-  { value: 'description', label: 'Deskripsi' },
-  { value: 'stock_qty', label: 'Jumlah Stok' },
-  { value: 'stock_status', label: 'Status Stok' },
-  { value: 'image_url', label: 'URL Gambar' },
-  { value: 'spec', label: 'Atribut / Varian' },
-  { value: 'ignore', label: 'Abaikan' },
-];
-
 function formatPrice(price: number | null, currency = 'IDR'): string {
   if (price === null) return '—';
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price);
 }
 
-function StockBadge({ status, qty }: { status: string; qty: number | null }) {
+function StockBadge({ status, qty, outLabel, preOrderLabel, stockLabel, availLabel }: {
+  status: string;
+  qty: number | null;
+  outLabel: string;
+  preOrderLabel: string;
+  stockLabel: (qty: number) => string;
+  availLabel: string;
+}) {
   if (status === 'out_of_stock') return (
-    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-red-500/15 text-red-400">Habis</span>
+    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-red-500/15 text-red-400">{outLabel}</span>
   );
   if (status === 'preorder') return (
-    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/15 text-amber-400">Pre-Order</span>
+    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/15 text-amber-400">{preOrderLabel}</span>
   );
   return (
     <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/15 text-emerald-400">
-      {qty !== null ? `Stok: ${qty}` : 'Tersedia'}
+      {qty !== null ? stockLabel(qty) : availLabel}
     </span>
   );
 }
@@ -84,6 +78,7 @@ function StockBadge({ status, qty }: { status: string; qty: number | null }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ProductsPage() {
+  const { t } = useLanguage();
   const [stage, setStage] = useState<Stage>('loading');
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
@@ -103,6 +98,20 @@ export default function ProductsPage() {
   const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  const FIELD_OPTIONS = [
+    { value: 'name', label: t('products.fieldName') },
+    { value: 'sku', label: t('products.fieldSku') },
+    { value: 'category', label: t('products.fieldCategory') },
+    { value: 'price', label: t('products.fieldPrice') },
+    { value: 'price_max', label: t('products.fieldMaxPrice') },
+    { value: 'description', label: t('products.fieldDesc') },
+    { value: 'stock_qty', label: t('products.fieldStock') },
+    { value: 'stock_status', label: t('products.fieldStockStatus') },
+    { value: 'image_url', label: t('products.fieldImage') },
+    { value: 'spec', label: t('products.fieldAttr') },
+    { value: 'ignore', label: t('products.fieldIgnore') },
+  ];
 
   // ── Fetch products ────────────────────────────────────────────────────────
 
@@ -158,7 +167,7 @@ export default function ProductsPage() {
       fd.append('file', file);
       const res = await fetch('/api/user/products/parse', { method: 'POST', body: fd });
       const data = await res.json();
-      if (!res.ok || data.error) { setError(data.error || 'Gagal memproses file'); setStage('catalog'); return; }
+      if (!res.ok || data.error) { setError(data.error || t('common.errorLoad')); setStage('catalog'); return; }
       // Build initial column mapping state from LLM result
       const initial: Record<string, string> = {};
       const m: ColumnMapping = data.mapping;
@@ -179,7 +188,7 @@ export default function ProductsPage() {
       setParseResult(data);
       setStage('mapping');
     } catch (e: any) {
-      setError(e.message || 'Gagal memproses file');
+      setError(e.message || t('common.errorLoad'));
       setStage('catalog');
     }
   };
@@ -214,11 +223,11 @@ export default function ProductsPage() {
   const handleImport = async () => {
     if (!parseResult) return;
     const confirmed = buildMappingFromState();
-    if (!confirmed.name) { setError('Kolom Nama Produk harus dipetakan'); return; }
+    if (!confirmed.name) { setError(t('products.nameRequired')); return; }
     setError('');
     setStage('importing');
     setProgress(0);
-    setProgressMsg('Memulai...');
+    setProgressMsg(t('products.importing'));
 
     try {
       const res = await fetch('/api/user/products/import', {
@@ -250,7 +259,7 @@ export default function ProductsPage() {
         }
       }
     } catch (e: any) {
-      setError(e.message || 'Import gagal');
+      setError(e.message || t('common.errorLoad'));
       setStage('catalog');
     }
   };
@@ -284,7 +293,7 @@ export default function ProductsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="w-10 h-10 rounded-full border-2 border-mint-500/30 border-t-mint-500 animate-spin" />
-        <p className="text-sm text-[--text-secondary]">Menganalisis kolom file...</p>
+        <p className="text-sm text-[--text-secondary]">{t('products.analyzing')}</p>
       </div>
     );
   }
@@ -300,9 +309,9 @@ export default function ProductsPage() {
             <X className="w-4 h-4" />
           </button>
           <div>
-            <h2 className="text-base font-semibold text-[--text-primary]">Pemetaan Kolom</h2>
+            <h2 className="text-base font-semibold text-[--text-primary]">{t('products.mappingTitle')}</h2>
             <p className="text-xs text-[--text-muted]">
-              {parseResult.filename} · {parseResult.row_count} baris · Periksa dan sesuaikan pemetaan kolom
+              {t('products.mappingInfo', { filename: parseResult.filename, rows: parseResult.row_count })}
             </p>
           </div>
         </div>
@@ -317,9 +326,9 @@ export default function ProductsPage() {
         {/* Mapping table */}
         <div className="bg-[--surface-2] border border-[--border] rounded-2xl overflow-hidden mb-5">
           <div className="grid grid-cols-3 gap-0 px-4 py-2.5 border-b border-[--border] bg-[--surface-3]">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Kolom CSV</span>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Dipetakan ke</span>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Contoh nilai</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colCsv')}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colMapped')}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colExample')}</span>
           </div>
           <div className="divide-y divide-[--border]">
             {parseResult.headers.map((header) => {
@@ -355,20 +364,20 @@ export default function ProductsPage() {
         {/* Info */}
         <div className="flex items-start gap-2 text-xs text-[--text-muted] bg-[--surface-2] border border-[--border] rounded-xl px-4 py-3 mb-5">
           <Tag className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-mint-500" />
-          <p>Kolom bertipe <strong className="text-[--text-secondary]">Atribut/Varian</strong> akan disimpan sebagai spesifikasi produk (warna, ukuran, RAM, dll) dan digunakan untuk pencarian semantik.</p>
+          <p>{t('products.attrNote')}</p>
         </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
           <button onClick={() => setStage('catalog')} className="px-4 py-2 text-sm text-[--text-secondary] hover:text-[--text-primary] hover:bg-[--surface-3] rounded-xl transition-colors">
-            Batal
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleImport}
             disabled={!nameAssigned}
             className="px-5 py-2 bg-mint-600 hover:bg-mint-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-mint-500/20"
           >
-            Konfirmasi & Import
+            {t('products.confirmImport')}
           </button>
         </div>
       </div>
@@ -394,7 +403,7 @@ export default function ProductsPage() {
             />
           </div>
         </div>
-        <p className="text-xs text-[--text-muted]">Jangan tutup halaman ini</p>
+        <p className="text-xs text-[--text-muted]">{t('products.importWarning')}</p>
       </div>
     );
   }
@@ -407,15 +416,15 @@ export default function ProductsPage() {
           <CheckCircle className="w-8 h-8 text-emerald-400" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-[--text-primary] mb-1">Import Berhasil</h3>
-          <p className="text-sm text-[--text-muted]">Katalog produk telah diperbarui dan diindeks</p>
+          <h3 className="text-base font-semibold text-[--text-primary] mb-1">{t('products.successTitle')}</h3>
+          <p className="text-sm text-[--text-muted]">{t('products.successDesc')}</p>
         </div>
         <div className="w-full grid grid-cols-2 gap-3">
           {[
-            { label: 'Ditambahkan', value: importResult.inserted, color: 'text-emerald-400' },
-            { label: 'Diperbarui', value: importResult.updated, color: 'text-mint-400' },
-            { label: 'Dinonaktifkan', value: importResult.deactivated, color: 'text-amber-400' },
-            { label: 'Total Terindeks', value: importResult.indexed, color: 'text-[--text-primary]' },
+            { label: t('products.added'), value: importResult.inserted, color: 'text-emerald-400' },
+            { label: t('products.updated'), value: importResult.updated, color: 'text-mint-400' },
+            { label: t('products.deactivated'), value: importResult.deactivated, color: 'text-amber-400' },
+            { label: t('products.totalIndexed'), value: importResult.indexed, color: 'text-[--text-primary]' },
           ].map(({ label, value, color }) => (
             <div key={label} className="bg-[--surface-2] border border-[--border] rounded-xl p-3">
               <div className={`text-xl font-bold ${color}`}>{value}</div>
@@ -427,7 +436,7 @@ export default function ProductsPage() {
           onClick={() => { setImportResult(null); setStage('catalog'); }}
           className="px-5 py-2.5 bg-mint-600 hover:bg-mint-500 text-white text-sm font-semibold rounded-xl transition-all w-full"
         >
-          Lihat Katalog
+          {t('products.viewCatalog')}
         </button>
       </div>
     );
@@ -444,10 +453,10 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-lg font-semibold text-[--text-primary] flex items-center gap-2">
             <Package className="w-5 h-5 text-mint-500" />
-            Katalog Produk
+            {t('products.title')}
           </h1>
           <p className="text-xs text-[--text-muted] mt-0.5">
-            Upload CSV/Excel untuk mengisi katalog dan mengaktifkan pencarian semantik produk
+            {t('products.description')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -457,7 +466,7 @@ export default function ProductsPage() {
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 border border-red-500/20 rounded-lg transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Hapus Semua
+              {t('products.deleteAll')}
             </button>
           )}
           <button
@@ -465,7 +474,7 @@ export default function ProductsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-mint-600 hover:bg-mint-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-mint-500/20"
           >
             <Upload className="w-4 h-4" />
-            {isEmpty ? 'Upload Katalog' : 'Upload Baru'}
+            {isEmpty ? t('products.uploadBtn') : t('products.uploadNewBtn')}
           </button>
         </div>
       </div>
@@ -483,9 +492,9 @@ export default function ProductsPage() {
       {!isEmpty && (
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { icon: ShoppingCart, label: 'Produk Aktif', value: stats.active, color: 'text-emerald-400' },
+            { icon: ShoppingCart, label: t('products.colProduct') + ' Aktif', value: stats.active, color: 'text-emerald-400' },
             { icon: BarChart2, label: 'Non-aktif', value: stats.inactive, color: 'text-amber-400' },
-            { icon: Tag, label: 'Kategori', value: categories.length, color: 'text-mint-400' },
+            { icon: Tag, label: t('products.fieldCategory'), value: categories.length, color: 'text-mint-400' },
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} className="bg-[--surface-2] border border-[--border] rounded-xl p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-[--surface-3] flex items-center justify-center flex-shrink-0">
@@ -517,8 +526,8 @@ export default function ProductsPage() {
             <FileSpreadsheet className="w-8 h-8 text-mint-500" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-[--text-primary]">Drag & drop atau klik untuk upload</p>
-            <p className="text-xs text-[--text-muted] mt-1">Format: CSV, XLS, XLSX · Satu baris per varian produk</p>
+            <p className="text-sm font-semibold text-[--text-primary]">{t('products.dropTitle')}</p>
+            <p className="text-xs text-[--text-muted] mt-1">{t('products.dropHint')}</p>
           </div>
           <div className="flex flex-wrap justify-center gap-2 text-xs text-[--text-muted]">
             {['Nama', 'Kategori', 'Harga', 'Stok', 'Warna', 'Ukuran', 'RAM', '...'].map((tag) => (
@@ -535,7 +544,7 @@ export default function ProductsPage() {
               <input
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Cari produk..."
+                placeholder={t('products.searchPlaceholder')}
                 className="w-full pl-9 pr-3 py-2 bg-[--surface-2] border border-[--border] rounded-xl text-sm text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:border-mint-500/60 focus:ring-1 focus:ring-mint-500/20"
               />
             </div>
@@ -545,13 +554,13 @@ export default function ProductsPage() {
                 onChange={(e) => handleCatFilter(e.target.value)}
                 className="px-3 py-2 bg-[--surface-2] border border-[--border] rounded-xl text-sm text-[--text-primary] focus:outline-none focus:border-mint-500/60 cursor-pointer"
               >
-                <option value="">Semua Kategori</option>
+                <option value="">{t('products.allCategories')}</option>
                 {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
             <button
               onClick={() => fileRef.current?.click()}
-              title="Upload file baru"
+              title={t('products.uploadNewBtn')}
               className="p-2 bg-[--surface-2] border border-[--border] hover:border-mint-500/50 rounded-xl text-[--text-muted] hover:text-mint-400 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
@@ -562,15 +571,15 @@ export default function ProductsPage() {
           <div className="bg-[--surface-2] border border-[--border] rounded-2xl overflow-hidden">
             {/* Table header */}
             <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2.5 border-b border-[--border] bg-[--surface-3]">
-              <span className="col-span-4 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Produk</span>
-              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Kategori</span>
-              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Harga</span>
-              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Stok</span>
-              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">Varian</span>
+              <span className="col-span-4 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colProduct')}</span>
+              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colCategory')}</span>
+              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colPrice')}</span>
+              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colStock')}</span>
+              <span className="col-span-2 text-[11px] font-semibold uppercase tracking-wider text-[--text-muted]">{t('products.colVariant')}</span>
             </div>
 
             {products.length === 0 ? (
-              <div className="py-12 text-center text-sm text-[--text-muted]">Tidak ada produk ditemukan</div>
+              <div className="py-12 text-center text-sm text-[--text-muted]">{t('products.noProducts')}</div>
             ) : (
               <div className="divide-y divide-[--border]">
                 {products.map((p) => (
@@ -591,7 +600,14 @@ export default function ProductsPage() {
                     </div>
                     {/* Stock */}
                     <div className="md:col-span-2">
-                      <StockBadge status={p.stock_status} qty={p.stock_qty} />
+                      <StockBadge
+                        status={p.stock_status}
+                        qty={p.stock_qty}
+                        outLabel={t('products.outOfStock')}
+                        preOrderLabel={t('products.preOrder')}
+                        stockLabel={(qty) => t('products.stockQty', { qty })}
+                        availLabel={t('products.available')}
+                      />
                     </div>
                     {/* Specs */}
                     <div className="md:col-span-2 flex flex-wrap gap-1">
@@ -615,7 +631,7 @@ export default function ProductsPage() {
           {/* Pagination */}
           {pages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-xs text-[--text-muted]">{total} produk</p>
+              <p className="text-xs text-[--text-muted]">{t('products.total', { total })}</p>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handlePage(page - 1)}
@@ -653,16 +669,14 @@ export default function ProductsPage() {
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[--surface-2] border border-[--border] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-base font-semibold text-[--text-primary] mb-2">Hapus Semua Produk?</h3>
-            <p className="text-sm text-[--text-muted] mb-5">
-              Seluruh katalog produk dan indeks vektor akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
-            </p>
+            <h3 className="text-base font-semibold text-[--text-primary] mb-2">{t('products.deleteConfirmTitle')}</h3>
+            <p className="text-sm text-[--text-muted] mb-5">{t('products.deleteConfirmDesc')}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowClearConfirm(false)} className="flex-1 py-2 text-sm text-[--text-secondary] hover:text-[--text-primary] border border-[--border] rounded-xl transition-colors">
-                Batal
+                {t('common.cancel')}
               </button>
               <button onClick={handleClear} className="flex-1 py-2 bg-red-500 hover:bg-red-400 text-white text-sm font-semibold rounded-xl transition-colors">
-                Ya, Hapus Semua
+                {t('products.deleteConfirmBtn')}
               </button>
             </div>
           </div>

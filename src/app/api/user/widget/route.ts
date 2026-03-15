@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
 import pool from '@/lib/db';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
-const COOKIE_NAME = 'pelanggan_token';
+import { getPelangganAuthKey, getStoreByKey } from '@/lib/pelanggan-auth';
 
 interface StoreInfo {
   store_id: number;
@@ -12,19 +8,12 @@ interface StoreInfo {
 }
 
 async function getStoreInfo(): Promise<StoreInfo | null> {
-  const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
+  const jid = getPelangganAuthKey();
+  if (!jid) return null;
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    const jid = payload.jid;
-    if (!jid) return null;
-    const [rows] = await pool.execute(
-      'SELECT store_id, store_subdomain FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
-    );
-    const data = rows as any[];
-    return data.length > 0 ? { store_id: data[0].store_id, store_subdomain: data[0].store_subdomain } : null;
+    const store = await getStoreByKey(jid);
+    if (!store) return null;
+    return { store_id: store.store_id, store_subdomain: store.store_subdomain };
   } catch {
     return null;
   }

@@ -2,41 +2,52 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Globe, BarChart2, MoreHorizontal, Package } from 'lucide-react';
+import { LayoutDashboard, Globe, BarChart2, MoreHorizontal, Package, QrCode, BookOpen, ClipboardList, CreditCard, Receipt } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PenLine, Images, Star, MessageSquare, Briefcase } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function UserBottomNav({ isSmart, storeType }: { isSmart: boolean; storeType?: string }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-  const isProductStore = storeType && !['Jasa', 'Layanan', 'Service'].includes(storeType);
+  const { t } = useLanguage();
+  const isProductStore = storeType && !['Jasa', 'Layanan', 'Service', 'services', 'others'].includes(storeType);
 
-  // Smart plan: 5 tabs — Home | Edit Toko | Website | Percakapan | Lainnya
-  // Basic plan: 3 tabs — Home | Edit Toko | Website
+  // Smart plan: 5 tabs — Home | Edit | Website | Conversations | More
+  // Basic plan: 3 tabs — Home | Edit | Website
   const MAIN_TABS = isSmart
     ? [
-        { href: '/user', label: 'Home', icon: LayoutDashboard },
-        { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
-        { href: '/user/website', label: 'Website', icon: Globe },
-        { href: '/user/conversations', label: 'Percakapan', icon: BarChart2 },
+        { href: '/user', label: t('nav.dashboard'), icon: LayoutDashboard },
+        { href: '/user/edit', label: t('nav.editStore'), icon: PenLine },
+        { href: '/user/website', label: t('nav.website'), icon: Globe },
+        { href: '/user/conversations', label: t('nav.conversations'), icon: BarChart2 },
       ]
     : [
-        { href: '/user', label: 'Home', icon: LayoutDashboard },
-        { href: '/user/edit', label: 'Edit Toko', icon: PenLine },
-        { href: '/user/website', label: 'Website', icon: Globe },
+        { href: '/user', label: t('nav.dashboard'), icon: LayoutDashboard },
+        { href: '/user/edit', label: t('nav.editStore'), icon: PenLine },
+        { href: '/user/website', label: t('nav.website'), icon: Globe },
       ];
 
   const MORE_ITEMS = isSmart
     ? [
-        { href: '/user/gallery', label: 'Gallery', icon: Images },
+        { href: '/user/knowledge-base', label: t('nav.knowledgeBase'), icon: BookOpen },
+        { href: '/user/fulfillment', label: t('nav.fulfillment'), icon: ClipboardList },
+        { href: '/user/gallery', label: t('nav.gallery'), icon: Images },
         isProductStore
-          ? { href: '/user/products', label: 'Katalog', icon: Package }
-          : { href: '/user/services', label: 'Layanan', icon: Briefcase },
-        { href: '/user/reviews', label: 'Ulasan', icon: Star },
-        { href: '/user/widget', label: 'Chat Widget', icon: MessageSquare },
+          ? { href: '/user/products', label: t('nav.productCatalog'), icon: Package }
+          : { href: '/user/services', label: t('nav.services'), icon: Briefcase },
+        { href: '/user/reviews', label: t('nav.reviews'), icon: Star },
+        { href: '/user/widget', label: t('nav.chatWidget'), icon: MessageSquare },
+        { href: '/user/pairing', label: t('nav.waPairing'), icon: QrCode },
+        { href: '/user/subscription', label: t('nav.subscription'), icon: CreditCard },
+        { href: '/user/transactions', label: t('nav.paymentHistory'), icon: Receipt },
       ]
-    : [];
+    : [
+        { href: '/user/pairing', label: t('nav.waPairing'), icon: QrCode },
+        { href: '/user/subscription', label: t('nav.subscription'), icon: CreditCard },
+        { href: '/user/transactions', label: t('nav.paymentHistory'), icon: Receipt },
+      ];
 
   return (
     <>
@@ -58,7 +69,7 @@ export default function UserBottomNav({ isSmart, storeType }: { isSmart: boolean
               transition={{ type: 'spring', stiffness: 500, damping: 40 }}
               className="fixed bottom-20 left-3 right-3 z-50 lg:hidden bg-[--surface-2] border border-[--border] rounded-2xl p-2 shadow-2xl"
             >
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-[--text-muted] px-2 pt-1 pb-2">Lainnya</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[--text-muted] px-2 pt-1 pb-2">{t('nav.more')}</p>
               <div className="grid grid-cols-2 gap-1">
                 {MORE_ITEMS.map(({ href, label, icon: Icon }) => {
                   const active = pathname === href || pathname.startsWith(href + '/');
@@ -114,8 +125,8 @@ export default function UserBottomNav({ isSmart, storeType }: { isSmart: boolean
             );
           })}
 
-          {/* Lainnya button — smart plan only */}
-          {isSmart && (
+          {/* Lainnya button */}
+          {MORE_ITEMS.length > 0 && (
             <button
               onClick={() => setMoreOpen(!moreOpen)}
               className="flex-1 flex flex-col items-center justify-center gap-1 h-full group"
@@ -129,7 +140,7 @@ export default function UserBottomNav({ isSmart, storeType }: { isSmart: boolean
                 />
               </div>
               <span className={`text-[10px] font-medium transition-colors leading-none ${moreOpen ? 'text-mint-400' : 'text-[--text-muted]'}`}>
-                Lainnya
+                {t('nav.more')}
               </span>
             </button>
           )}

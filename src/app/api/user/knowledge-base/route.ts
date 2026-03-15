@@ -129,8 +129,8 @@ export async function POST(req: Request) {
         // 2. Load store
         send('progress', { pct: 5, message: 'Menyiapkan...' });
         const [rows] = await pool.execute(
-          'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-          [jid]
+          'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+          [jid, jid]
         ) as any[];
         const store = rows[0];
         if (!store) { send('error', { message: 'Store not found' }); return; }
@@ -247,8 +247,8 @@ export async function DELETE() {
 
   try {
     const [rows] = await pool.execute(
-      'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ?',
-      [jid]
+      'SELECT store_id, store_subdomain, store_folder FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     ) as any[];
     const store = rows[0];
     if (!store) {
@@ -256,8 +256,8 @@ export async function DELETE() {
     }
 
     await pool.execute(
-      'UPDATE pelanggan SET store_knowledge_base = NULL, store_updated_at = NOW() WHERE store_whatsapp_jid = ?',
-      [jid]
+      'UPDATE pelanggan SET store_knowledge_base = NULL, store_updated_at = NOW() WHERE store_whatsapp_jid = ? OR store_folder = ?',
+      [jid, jid]
     );
 
     revalidateClient({ subdomain: store.store_subdomain, storeId: store.store_id });

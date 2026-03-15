@@ -7,7 +7,7 @@ export async function GET(_req: Request, { params }: { params: { jid: string } }
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const [rows] = await pool.execute('SELECT * FROM pelanggan WHERE store_whatsapp_jid = ?', [params.jid]);
+    const [rows] = await pool.execute('SELECT * FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ? LIMIT 1', [params.jid, params.jid]);
     const data = rows as any[];
     if (data.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(data[0]);
@@ -41,8 +41,8 @@ export async function PUT(req: Request, { params }: { params: { jid: string } })
       }
     }
     if (sets.length === 0) return NextResponse.json({ error: 'No fields provided' }, { status: 400 });
-    vals.push(params.jid);
-    await pool.execute(`UPDATE pelanggan SET ${sets.join(',')} WHERE store_whatsapp_jid = ?`, vals);
+    vals.push(params.jid, params.jid);
+    await pool.execute(`UPDATE pelanggan SET ${sets.join(',')} WHERE store_whatsapp_jid = ? OR store_folder = ?`, vals);
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -54,7 +54,7 @@ export async function DELETE(_req: Request, { params }: { params: { jid: string 
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    await pool.execute('DELETE FROM pelanggan WHERE store_whatsapp_jid = ?', [params.jid]);
+    await pool.execute('DELETE FROM pelanggan WHERE store_whatsapp_jid = ? OR store_folder = ?', [params.jid, params.jid]);
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
