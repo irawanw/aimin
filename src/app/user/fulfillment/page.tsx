@@ -225,10 +225,14 @@ export default function FulfillmentPage() {
                 {/* Label + variable + hint */}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-[--text-primary] leading-none">{f.label}</span>
+                    <span className="text-sm font-medium text-[--text-primary] leading-none">
+                      {t(`fulfillment.field_${f.field}_label` as any) || f.label}
+                    </span>
                     <code className="text-[10px] text-[--text-muted] bg-[--surface-3] border border-[--border] px-1.5 py-0.5 rounded font-mono">{f.field}</code>
                   </div>
-                  <p className="text-xs text-[--text-muted] mt-0.5 truncate">{f.hint}</p>
+                  <p className="text-xs text-[--text-muted] mt-0.5 truncate">
+                    {t(`fulfillment.field_${f.field}_hint` as any) || f.hint}
+                  </p>
                 </div>
 
                 {/* Enabled toggle */}

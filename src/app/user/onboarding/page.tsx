@@ -1002,7 +1002,7 @@ export default function OnboardingPage() {
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const visibleSteps  = steps.filter(s => s.step_key !== 'store_type');
+  const visibleSteps  = steps.filter(s => s.step_key !== 'store_type' && s.step_key !== 'store_images');
   const totalSteps    = visibleSteps.length;
   const step          = visibleSteps[currentStep];
   const progress      = totalSteps > 0 ? (currentStep / totalSteps) * 100 : 0;
